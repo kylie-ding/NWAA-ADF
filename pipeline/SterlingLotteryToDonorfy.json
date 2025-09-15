@@ -2039,6 +2039,118 @@
 				}
 			},
 			{
+				"name": "LookupAnyErrors",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Execute Process All Transaction Records",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Execute Process All Activity Records",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Process All Constituent Records",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT (\nSELECT COUNT(*) \nFROM integration.Import_Constituents \nWHERE TRIM(ISNULL(ErrorMessage,'')) != ''\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().Pipeline}'\nAND ADFPipelineRunId = '@{pipeline().RunId}'\n)\n+ \n(\nSELECT COUNT(*) \nFROM integration.Import_Transactions \nWHERE TRIM(ISNULL(ErrorMessage,'')) != ''\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().Pipeline}'\nAND ADFPipelineRunId = '@{pipeline().RunId}'\n)\n+ \n(\nSELECT COUNT(*) \nFROM integration.Import_Activities \nWHERE TRIM(ISNULL(ErrorMessage,'')) != ''\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().Pipeline}'\nAND ADFPipelineRunId = '@{pipeline().RunId}'\n)\nAS ErrorCount",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLImportConstituents",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "If Any Errors",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LookupAnyErrors",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('LookupAnyErrors').output.firstRow.ErrorCount, 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute SendAlertToTeamsChannel",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "SendAlertToTeamsChannel",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"subscription": {
+										"value": "@pipeline().parameters.Subscription",
+										"type": "Expression"
+									},
+									"resourceGroup": {
+										"value": "@pipeline().parameters.ResourceGroup",
+										"type": "Expression"
+									},
+									"runId": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"name": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"triggerTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"status": "Load Completed with Errors",
+									"message": "The load of Constituents, Activities or Transactions has completed with errors logged.  Please check the log files for the specific error messages.",
+									"teamWebhookUrls": {
+										"value": "@pipeline().parameters.ErrorAlertDestinationWebhooks",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
 				"name": "Set GAD Processed if Exists",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
