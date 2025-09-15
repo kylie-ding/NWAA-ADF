@@ -1,0 +1,469 @@
+{
+	"name": "AzureSQLImportConstituents",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "NWAAAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ConstituentsImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TenantCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IntegrationName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineRunId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IntegrationSourceConstituentKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProcessedRecord",
+				"type": "bit"
+			},
+			{
+				"name": "IsActive",
+				"type": "bit"
+			},
+			{
+				"name": "ArchiveReason",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ArchiveDate",
+				"type": "date"
+			},
+			{
+				"name": "ExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Title",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FirstName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "LastName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Suffix",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Formerly",
+				"type": "nvarchar"
+			},
+			{
+				"name": "HouseBuildingNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Address1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Address2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Town",
+				"type": "nvarchar"
+			},
+			{
+				"name": "County",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Postcode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Country",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Area",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "OtherPhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MobilePhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "NationalIDNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "EmailAddress1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "EmailAddress2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "LabelName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Salutation",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_HouseBuildingNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Address1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Address2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Town",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_County",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Postcode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Country",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Area",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_PhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_OtherPhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_MobilePhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_EmailAddress1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_EmailAddress2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_LabelName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work_Salutation",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WebSite",
+				"type": "nvarchar"
+			},
+			{
+				"name": "RecruitmentCampaign",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DateOfBirth",
+				"type": "date"
+			},
+			{
+				"name": "YearOfBirth",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "OrganisationName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "JobTitle",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Department",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Gender",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ConstituentType",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Comments",
+				"type": "nvarchar"
+			},
+			{
+				"name": "OKToMail",
+				"type": "bit"
+			},
+			{
+				"name": "OKToPhone",
+				"type": "bit"
+			},
+			{
+				"name": "OKToSMS",
+				"type": "bit"
+			},
+			{
+				"name": "OKToEmail",
+				"type": "bit"
+			},
+			{
+				"name": "AllowNameSwap",
+				"type": "bit"
+			},
+			{
+				"name": "HasGAD",
+				"type": "bit"
+			},
+			{
+				"name": "GiftAidNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "GADDecDate",
+				"type": "date"
+			},
+			{
+				"name": "DeclarationMethod",
+				"type": "nvarchar"
+			},
+			{
+				"name": "GADStartDate",
+				"type": "date"
+			},
+			{
+				"name": "GADEndDate",
+				"type": "date"
+			},
+			{
+				"name": "GADCancelled",
+				"type": "bit"
+			},
+			{
+				"name": "GADCancelDate",
+				"type": "date"
+			},
+			{
+				"name": "TaxPayerTitle",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TaxPayerFirstName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TaxPayerLastName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "RefusedGAD",
+				"type": "bit"
+			},
+			{
+				"name": "IncludeRow",
+				"type": "bit"
+			},
+			{
+				"name": "IsGroupConstituent",
+				"type": "bit"
+			},
+			{
+				"name": "FK_TenantId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "ConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "GiftAidDecId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "TagId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IsGroup",
+				"type": "bit"
+			},
+			{
+				"name": "PersonalContactDetailsId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "WorkContactDetailsId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "OtherContactDetailsId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_ConstituentTypeId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_RecruitmentCampaign",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_CountryId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_ArchiveReasonId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_DeclarationMethod",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_WorkCountryId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "MainContactConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "MainContactPersonalContactDetailsId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "MainContactWorkContactDetailsId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "MainContactOtherContactDetailsId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "MainContactFK_ConstituentTypeId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "ConstituentNumber",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "FK_Area_Id",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Work_Area_Id",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "MatchScore",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "HowIntegrated",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FileName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DateAdded",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ErrorMessage",
+				"type": "nvarchar"
+			},
+			{
+				"name": "OriginalConstituentsImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "RetryAttempts",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "OrderNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SuccessfullyReprocessed",
+				"type": "bit"
+			},
+			{
+				"name": "MatchAttempted",
+				"type": "bit"
+			},
+			{
+				"name": "OrderId",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Operation",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "integration",
+			"table": "Import_Constituents"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

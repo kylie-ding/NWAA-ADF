@@ -1,0 +1,17 @@
+{
+	"name": "AzureSQLIntegrationImportSettings",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "NWAAAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "integration",
+			"table": "IntegrationImportSettings"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

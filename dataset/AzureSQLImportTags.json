@@ -1,0 +1,287 @@
+{
+	"name": "AzureSQLImportTags",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "NWAAAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "TagsImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TenantCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IntegrationName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineRunId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IntegrationSourceConstituentKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProcessedRecord",
+				"type": "bit"
+			},
+			{
+				"name": "ExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DateTagged",
+				"type": "date"
+			},
+			{
+				"name": "TagIsActive",
+				"type": "bit"
+			},
+			{
+				"name": "TagCategory",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TagName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TagStartDate",
+				"type": "date"
+			},
+			{
+				"name": "TagEndDate",
+				"type": "date"
+			},
+			{
+				"name": "Comments",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code3",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code4",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code5",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code6",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code7",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code8",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code9",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Code10",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Date1",
+				"type": "date"
+			},
+			{
+				"name": "Date2",
+				"type": "date"
+			},
+			{
+				"name": "Date3",
+				"type": "date"
+			},
+			{
+				"name": "Date4",
+				"type": "date"
+			},
+			{
+				"name": "Date5",
+				"type": "date"
+			},
+			{
+				"name": "Date6",
+				"type": "date"
+			},
+			{
+				"name": "Date7",
+				"type": "date"
+			},
+			{
+				"name": "Date8",
+				"type": "date"
+			},
+			{
+				"name": "Date9",
+				"type": "date"
+			},
+			{
+				"name": "Date10",
+				"type": "date"
+			},
+			{
+				"name": "Number1",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number2",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number3",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number4",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number5",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number6",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number7",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number8",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number9",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Number10",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "YesNo1",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo2",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo3",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo4",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo5",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo6",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo7",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo8",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo9",
+				"type": "bit"
+			},
+			{
+				"name": "YesNo10",
+				"type": "bit"
+			},
+			{
+				"name": "ConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_TagCategoryLookUpTypeRefId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_TagLookUpRefId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_TenantId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "ErrorMessage",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Operation",
+				"type": "varchar"
+			},
+			{
+				"name": "SourceSystemInfo",
+				"type": "xml"
+			}
+		],
+		"typeProperties": {
+			"schema": "integration",
+			"table": "Import_Tags"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

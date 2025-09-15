@@ -1,0 +1,308 @@
+{
+	"name": "SterlingLotteryCSVBlobStorageMembers",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "sterling-lottery-blobs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Player ID",
+				"type": "String"
+			},
+			{
+				"name": "Client Member ID",
+				"type": "String"
+			},
+			{
+				"name": "Title",
+				"type": "String"
+			},
+			{
+				"name": "FirstName",
+				"type": "String"
+			},
+			{
+				"name": "Surname",
+				"type": "String"
+			},
+			{
+				"name": "Address 1",
+				"type": "String"
+			},
+			{
+				"name": "Address 2",
+				"type": "String"
+			},
+			{
+				"name": "Address 3",
+				"type": "String"
+			},
+			{
+				"name": "Address 4",
+				"type": "String"
+			},
+			{
+				"name": "Town / City",
+				"type": "String"
+			},
+			{
+				"name": "County",
+				"type": "String"
+			},
+			{
+				"name": "Postcode",
+				"type": "String"
+			},
+			{
+				"name": "Phone",
+				"type": "String"
+			},
+			{
+				"name": "E-mail",
+				"type": "String"
+			},
+			{
+				"name": "Mobile",
+				"type": "String"
+			},
+			{
+				"name": "Date of Birth",
+				"type": "String"
+			},
+			{
+				"name": "Created Date",
+				"type": "String"
+			},
+			{
+				"name": "Member Status",
+				"type": "String"
+			},
+			{
+				"name": "Cancelled Date",
+				"type": "String"
+			},
+			{
+				"name": "Cancelled Reason",
+				"type": "String"
+			},
+			{
+				"name": "Number of Numbers",
+				"type": "String"
+			},
+			{
+				"name": "Active Numbers",
+				"type": "String"
+			},
+			{
+				"name": "Inactive Numbers",
+				"type": "String"
+			},
+			{
+				"name": "Earliest Draw",
+				"type": "String"
+			},
+			{
+				"name": "Current Balance",
+				"type": "String"
+			},
+			{
+				"name": "Total Payments",
+				"type": "String"
+			},
+			{
+				"name": "Total Payments Amount",
+				"type": "String"
+			},
+			{
+				"name": "Total Winnings",
+				"type": "String"
+			},
+			{
+				"name": "Draws Dormant",
+				"type": "String"
+			},
+			{
+				"name": "SourceCode",
+				"type": "String"
+			},
+			{
+				"name": "Payment Frequency",
+				"type": "String"
+			},
+			{
+				"name": "Payment Method",
+				"type": "String"
+			},
+			{
+				"name": "Cash Round Reference",
+				"type": "String"
+			},
+			{
+				"name": "Payroll Round Reference",
+				"type": "String"
+			},
+			{
+				"name": "Bank Account",
+				"type": "String"
+			},
+			{
+				"name": "Modulus Check",
+				"type": "String"
+			},
+			{
+				"name": "Payment Status",
+				"type": "String"
+			},
+			{
+				"name": "Canvasser",
+				"type": "String"
+			},
+			{
+				"name": "Supported Charity",
+				"type": "String"
+			},
+			{
+				"name": "Lottery Mail",
+				"type": "String"
+			},
+			{
+				"name": "Publicity",
+				"type": "String"
+			},
+			{
+				"name": "Un-contactable (Gone Away)",
+				"type": "String"
+			},
+			{
+				"name": "No Cancellation Mail",
+				"type": "String"
+			},
+			{
+				"name": "Donor Number",
+				"type": "String"
+			},
+			{
+				"name": "Last Modified",
+				"type": "String"
+			},
+			{
+				"name": "Receipt Code",
+				"type": "String"
+			},
+			{
+				"name": "Deceased",
+				"type": "String"
+			},
+			{
+				"name": "Raffle Marketing - All",
+				"type": "String"
+			},
+			{
+				"name": "Organisation Imposed - Email",
+				"type": "String"
+			},
+			{
+				"name": "Direct Communication - Email",
+				"type": "String"
+			},
+			{
+				"name": "Charity Marketing - Email",
+				"type": "String"
+			},
+			{
+				"name": "FPS Registered - Email",
+				"type": "String"
+			},
+			{
+				"name": "TPS Registered - Home Telephone",
+				"type": "String"
+			},
+			{
+				"name": "Organisation Imposed - Home Telephone",
+				"type": "String"
+			},
+			{
+				"name": "Direct Communication - Home Telephone",
+				"type": "String"
+			},
+			{
+				"name": "FPS Registered - Home Telephone",
+				"type": "String"
+			},
+			{
+				"name": "Charity Marketing - Home Telephone",
+				"type": "String"
+			},
+			{
+				"name": "MPS Registered - Letter",
+				"type": "String"
+			},
+			{
+				"name": "FPS Registered - Letter",
+				"type": "String"
+			},
+			{
+				"name": "Direct Communication - Letter",
+				"type": "String"
+			},
+			{
+				"name": "Organisation Imposed - Letter",
+				"type": "String"
+			},
+			{
+				"name": "Charity Marketing - Letter",
+				"type": "String"
+			},
+			{
+				"name": "FPS Registered - Mobile",
+				"type": "String"
+			},
+			{
+				"name": "TPS Registered - Mobile",
+				"type": "String"
+			},
+			{
+				"name": "Direct Communication - Mobile",
+				"type": "String"
+			},
+			{
+				"name": "Charity Marketing - Mobile",
+				"type": "String"
+			},
+			{
+				"name": "Organisation Imposed - Mobile",
+				"type": "String"
+			},
+			{
+				"name": "FPS Registered - SMS",
+				"type": "String"
+			},
+			{
+				"name": "Charity Marketing - SMS",
+				"type": "String"
+			},
+			{
+				"name": "Direct Communication - SMS",
+				"type": "String"
+			},
+			{
+				"name": "Organisation Imposed - SMS",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

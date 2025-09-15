@@ -1,0 +1,125 @@
+{
+	"name": "SterlingLotteryCSVBlobStorageGADLogFile",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@concat('GAD Log File ', utcNow('yyyyMMdd hhm'),'.csv')",
+					"type": "Expression"
+				},
+				"folderPath": "Log Files",
+				"container": "sterling-lottery-blobs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "GADImportId",
+				"type": "String"
+			},
+			{
+				"name": "TenantCode",
+				"type": "String"
+			},
+			{
+				"name": "IntegrationName",
+				"type": "String"
+			},
+			{
+				"name": "ADFPipelineName",
+				"type": "String"
+			},
+			{
+				"name": "ADFPipelineRunId",
+				"type": "String"
+			},
+			{
+				"name": "IntegrationSourceConstituentKey",
+				"type": "String"
+			},
+			{
+				"name": "ProcessedRecord",
+				"type": "String"
+			},
+			{
+				"name": "DeclarationMethod",
+				"type": "String"
+			},
+			{
+				"name": "ConstituentId",
+				"type": "String"
+			},
+			{
+				"name": "Campaign",
+				"type": "String"
+			},
+			{
+				"name": "DeclarationDate",
+				"type": "String"
+			},
+			{
+				"name": "DeclarationStartDate",
+				"type": "String"
+			},
+			{
+				"name": "DeclarationEndDate",
+				"type": "String"
+			},
+			{
+				"name": "GADCancelled",
+				"type": "String"
+			},
+			{
+				"name": "GADCancelDate",
+				"type": "String"
+			},
+			{
+				"name": "GADDeclarationId",
+				"type": "String"
+			},
+			{
+				"name": "TaxPayerTitle",
+				"type": "String"
+			},
+			{
+				"name": "TaxPayerFirstName",
+				"type": "String"
+			},
+			{
+				"name": "TaxPayerLastName",
+				"type": "String"
+			},
+			{
+				"name": "ConfirmationRequired",
+				"type": "String"
+			},
+			{
+				"name": "ErrorMessage",
+				"type": "String"
+			},
+			{
+				"name": "Operation",
+				"type": "String"
+			},
+			{
+				"name": "SourceSystemInfo",
+				"type": "String"
+			},
+			{
+				"name": "ConfirmedDate",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

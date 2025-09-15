@@ -1,0 +1,9 @@
+{
+	"name": "NWAA-DATA-FACTORY",
+	"location": "uksouth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c8cea166-2e7b-44fb-ac7c-4806be2993c7",
+		"tenantId": "944d86c8-6ad0-4365-b69c-271146fa0c00"
+	}
+}

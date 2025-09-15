@@ -1,0 +1,442 @@
+{
+	"name": "DonorfyIntegrationsMatchConstituentsToDonorfy",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Initial Unprocessed Record Count",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "If KeyStorageType",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT COUNT(*) AS UnmatchedRecordCount\nFROM integration.Import_Constituents\nWHERE ISNULL(MatchAttempted,0) = 0\nAND ConstituentId IS NULL\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().parameters.CallingPipelineName}'\nAND ADFPipelineRunId = '@{pipeline().parameters.CallingPipelineRunId}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLImportConstituents",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set Initial UnprocessedRecordCount",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Initial Unprocessed Record Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "UnprocessedRecords",
+					"value": {
+						"value": "@string(activity('Get Initial Unprocessed Record Count').output.firstRow.UnmatchedRecordCount)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Until All Processed",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Set Initial UnprocessedRecordCount",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('UnprocessedRecords'),'0')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "If Unprocessed Records",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@not(equals(variables('UnprocessedRecords'),'0'))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Get Unprocessed Record Count",
+										"type": "Lookup",
+										"dependsOn": [
+											{
+												"activity": "Azure Function Match To Donorfy",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "SELECT COUNT(*) AS UnmatchedRecordCount\nFROM integration.Import_Constituents\nWHERE ISNULL(MatchAttempted,0) = 0\nAND ConstituentId IS NULL\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().parameters.CallingPipelineName}'\nAND ADFPipelineRunId = '@{pipeline().parameters.CallingPipelineRunId}'",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "AzureSQLImportConstituents",
+												"type": "DatasetReference"
+											}
+										}
+									},
+									{
+										"name": "Set UnprocessedRecordCount",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Get Unprocessed Record Count",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "UnprocessedRecords",
+											"value": {
+												"value": "@string(activity('Get Unprocessed Record Count').output.firstRow.UnmatchedRecordCount)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Set UnprocessedRecordCount to 0 On Failure",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Azure Function Match To Donorfy",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "UnprocessedRecords",
+											"value": {
+												"value": "0",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Azure Function Match To Donorfy",
+										"type": "AzureFunctionActivity",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"functionName": "MatchConstituents",
+											"body": {
+												"value": "{\"RunId\": \"@{pipeline().parameters.CallingPipelineRunId}\",\n\"ADFPipelineName\" : \"@{pipeline().parameters.CallingPipelineName}\",\n\"IntegrationName\" : \"@{pipeline().parameters.IntegrationName}\",\n\"DonorfyAPIKey\" : \"@{pipeline().parameters.TenantCode}\",\n\"DonorfyAPIAccessKey\" : \"@{pipeline().parameters.APIAccessKey}\",\n\"DonorfyAPIUsername\" : \"@{pipeline().parameters.APIUserName}\",\n\"BreakBeforeTimeoutSeconds\" : \"230\"\n}",
+												"type": "Expression"
+											},
+											"method": "POST"
+										},
+										"linkedServiceName": {
+											"referenceName": "DonorfyIngegrationAzureFunction",
+											"type": "LinkedServiceReference"
+										}
+									}
+								]
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Match Via Donorfy Duplicate Check",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Until All Processed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[integration].[MatchConstituentsViaAPIDupCheck]",
+					"storedProcedureParameters": {
+						"ADFPipelineName": {
+							"value": {
+								"value": "@pipeline().parameters.CallingPipelineName",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ADFPipelineRunId": {
+							"value": {
+								"value": "@pipeline().parameters.CallingPipelineRunId",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						},
+						"IntegrationName": {
+							"value": {
+								"value": "@pipeline().parameters.IntegrationName",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"TenantCode": {
+							"value": {
+								"value": "@pipeline().parameters.TenantCode",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "If KeyStorageType",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.DonorfyKeyStorageType,'ConstituentNumber')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Match Via Social Media",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[integration].[MatchConstituentsViaSocialMediaID]",
+								"storedProcedureParameters": {
+									"ADFPipelineName": {
+										"value": {
+											"value": "@pipeline().parameters.CallingPipelineName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ADFPipelineRunId": {
+										"value": {
+											"value": "@pipeline().parameters.CallingPipelineRunId",
+											"type": "Expression"
+										},
+										"type": "Guid"
+									},
+									"IntegrationName": {
+										"value": {
+											"value": "@pipeline().parameters.IntegrationName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"TenantCode": {
+										"value": {
+											"value": "@pipeline().parameters.TenantCode",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SocialMediaName": {
+										"value": {
+											"value": "@pipeline().parameters.DonorfyKeyStorageLocation",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "NWAAAzureSqlDatabase",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Match Via ConstituentNumber",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[integration].[MatchConstituentsViaConstituentNumber]",
+								"storedProcedureParameters": {
+									"ADFPipelineName": {
+										"value": {
+											"value": "@pipeline().parameters.CallingPipelineName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ADFPipelineRunId": {
+										"value": {
+											"value": "@pipeline().parameters.CallingPipelineRunId",
+											"type": "Expression"
+										},
+										"type": "Guid"
+									},
+									"IntegrationName": {
+										"value": {
+											"value": "@pipeline().parameters.IntegrationName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"TenantCode": {
+										"value": {
+											"value": "@pipeline().parameters.TenantCode",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "NWAAAzureSqlDatabase",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"APIUserName": {
+				"type": "string",
+				"defaultValue": "Mast Azure Data Factory"
+			},
+			"TenantCode": {
+				"type": "string",
+				"defaultValue": "ZRTXSIYSU7"
+			},
+			"IntegrationName": {
+				"type": "string",
+				"defaultValue": "NWAASterlingLottery"
+			},
+			"CallingPipelineName": {
+				"type": "string",
+				"defaultValue": "SterlingLotteryToDonorfy"
+			},
+			"CallingPipelineRunId": {
+				"type": "string",
+				"defaultValue": "761F4E5D-FF18-4727-BA76-EBFFDDAF97CC"
+			},
+			"APIAccessKey": {
+				"type": "string",
+				"defaultValue": "-_7S_3Wy8U@6?snX@x5Q08u?N"
+			},
+			"DonorfyKeyStorageLocation": {
+				"type": "string",
+				"defaultValue": "Sterling Lottery"
+			},
+			"DonorfyKeyStorageType": {
+				"type": "string",
+				"defaultValue": "SocialMedia"
+			}
+		},
+		"variables": {
+			"UnprocessedRecords": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"IsAllProcessed": {
+				"type": "Boolean"
+			},
+			"DoAzureFunction": {
+				"type": "Boolean"
+			}
+		},
+		"folder": {
+			"name": "Mast Donorfy Integration Pipelines"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-28T20:07:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

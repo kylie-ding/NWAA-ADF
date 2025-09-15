@@ -1,0 +1,793 @@
+{
+	"name": "SterlingLotteryToDonorfy_LoadStagingTablesOnly_v1",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupDonorfyLotterySettings",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT lp.[Value] AS DonorfyLotteryPurpose,\n  lc.[Value] AS DonorfyLotteryCampaign,\n  lpr.[Value] AS DonorfyLotteryProduct,\n  kp.[Value] AS DonorfyKeyPrefix\n  FROM [integration].[IntegrationImportSettings] lp\n  INNER JOIN [integration].[IntegrationImportSettings] lc\n  ON  lc.TenantCode = lp.TenantCode\n  AND lc.IntegrationName = lp.IntegrationName\n  AND lc.[Key] = 'DonorfyLotteryCampaign'\n  INNER JOIN [integration].[IntegrationImportSettings] lpr\n  ON  lpr.TenantCode = lp.TenantCode\n  AND lpr.IntegrationName = lp.IntegrationName\n  AND lpr.[Key] = 'DonorfyLotteryProduct'\n  INNER JOIN [integration].[IntegrationImportSettings] kp\n  ON  kp.TenantCode = lp.TenantCode\n  AND kp.IntegrationName = lp.IntegrationName\n  AND kp.[Key] = 'DonorfyKeyPrefix'\n  WHERE lp.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND lp.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND lp.[Key] = 'DonorfyLotteryPurpose'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLIntegrationImportSettings",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryPurpose",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotterySettings",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryPurpose",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyLotteryPurpose)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryCampaign",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotterySettings",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryCampaign",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyLotteryCampaign)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LookupDonorfyLotteryTags",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT dltc.[Value] AS DonorfyLotteryTagCategory,\n dat.Value AS DonorfyLotteryActiveTag,\n dct.Value AS DonorfyLotteryCancelledTag,\n dlwt.Value AS DonorfyLotteryWinnerTag,\n dlset.Value AS DonorfyLotterySelfExcludeTag\n  FROM [integration].[IntegrationImportSettings] dltc\n  INNER JOIN [integration].[IntegrationImportSettings] dat \n  ON dat.TenantCode = dltc.TenantCode\n  AND dat.IntegrationName = dltc.IntegrationName\n  AND dat.[Key] = 'DonorfyLotteryActiveTag'\n  INNER JOIN [integration].[IntegrationImportSettings] dct \n  ON dct.TenantCode = dltc.TenantCode\n  AND dct.IntegrationName = dltc.IntegrationName\n  AND dct.[Key] = 'DonorfyLotteryCancelledTag'\n  INNER JOIN [integration].[IntegrationImportSettings] dlwt \n  ON dlwt.TenantCode = dltc.TenantCode\n  AND dlwt.IntegrationName = dltc.IntegrationName\n  AND dlwt.[Key] = 'DonorfyLotteryWinnerTag'\n  INNER JOIN [integration].[IntegrationImportSettings] dlset \n  ON dlset.TenantCode = dltc.TenantCode\n  AND dlset.IntegrationName = dltc.IntegrationName\n  AND dlset.[Key] = 'DonorfyLotterySelfExcludeTag'\n  WHERE dltc.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND dltc.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND dltc.[Key] = 'DonorfyLotteryTagCategory'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLIntegrationImportSettings",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryTagCategory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotteryTags",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryTagCategory",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryTagCategory)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryActiveTag",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotteryTags",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryActiveTag",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryActiveTag)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryCancelledTag",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotteryTags",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryCancelledTag",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryCancelledTag)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LookupDonorfyReasons",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT ddr.[Value] AS DonorfyDeceasedReason,\n    dgar.[Value] AS DonorfyGoneAwayReason\n  FROM [integration].[IntegrationImportSettings] ddr\n  INNER JOIN [integration].[IntegrationImportSettings] dgar \n  ON dgar.TenantCode = ddr.TenantCode\n  AND dgar.IntegrationName = ddr.IntegrationName\n  AND dgar.[Key] = 'DonorfyGoneAwayReason'\n  WHERE ddr.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND ddr.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND ddr.[Key] = 'DonorfyDeceasedReason'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLIntegrationImportSettings",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyDeceasedReason",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyReasons",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyDeceasedReason",
+					"value": {
+						"value": "@string(activity('LookupDonorfyReasons').output.firstRow.DonorfyDeceasedReason)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyGoneAwayReason",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyReasons",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyGoneAwayReason",
+					"value": {
+						"value": "@string(activity('LookupDonorfyReasons').output.firstRow.DonorfyGoneAwayReason)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LookupDonorfyTransactionDefaults",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT ba.[Value] AS DonorfyBankAccount,\n    f.[Value] AS DonorfyFund,\n    pm.[Value] As DonorfyDefaultPaymentMethod,\n    dd.[Value] As DonorfyDepartment\n  FROM [integration].[IntegrationImportSettings] ba\n  INNER JOIN [integration].[IntegrationImportSettings] f \n  ON f.TenantCode = ba.TenantCode\n  AND f.IntegrationName = ba.IntegrationName\n  AND f.[Key] = 'DonorfyFund'\n  INNER JOIN [integration].[IntegrationImportSettings] pm \n  ON pm.TenantCode = ba.TenantCode\n  AND pm.IntegrationName = ba.IntegrationName\n  AND pm.[Key] = 'DonorfyDefaultPaymentMethod'\n  INNER JOIN [integration].[IntegrationImportSettings] dd \n  ON dd.TenantCode = ba.TenantCode\n  AND dd.IntegrationName = ba.IntegrationName\n  AND dd.[Key] = 'DonorfyDepartment'\n  WHERE ba.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND ba.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND ba.[Key] = 'DonorfyBankAccount'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLIntegrationImportSettings",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "SetDonorfyBankAccount",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyTransactionDefaults",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyBankAccount",
+					"value": {
+						"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyBankAccount)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetDonorfyLotteryProduct",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotterySettings",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryProduct",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyLotteryProduct)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetDonorfyFund",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyTransactionDefaults",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyFund",
+					"value": {
+						"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyFund)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetDonorfyDefaultPaymentMethod",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyTransactionDefaults",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyDefaultPaymentMethod",
+					"value": {
+						"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyDefaultPaymentMethod)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SterlingLottery_to_DonorfyStaging",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "SetDonorfyLotteryProduct",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryTagCategory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryCampaign",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryPurpose",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryActiveTag",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryCancelledTag",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyDeceasedReason",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyGoneAwayReason",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetDonorfyBankAccount",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetDonorfyFund",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetDonorfyDefaultPaymentMethod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyKeyPrefix",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetDonorfyDepartment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryWinnerTag",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set DonorfyLotteryDonorfyLotterySelfExcludeTag",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "SterlingLottery_to_DonorfyStaging",
+						"type": "DataFlowReference",
+						"parameters": {
+							"DonorfyTenantCode": {
+								"value": "'@{pipeline().parameters.TenantCode}'",
+								"type": "Expression"
+							},
+							"IntegrationName": {
+								"value": "'@{pipeline().parameters.IntegrationName}'",
+								"type": "Expression"
+							},
+							"ADFPipelineName": {
+								"value": "'@{pipeline().Pipeline}'",
+								"type": "Expression"
+							},
+							"ADFPipelineRunId": {
+								"value": "'@{pipeline().RunId}'",
+								"type": "Expression"
+							},
+							"DonorfyKeyPrefix": {
+								"value": "'@{variables('DonorfyKeyPrefix')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryPurpose": {
+								"value": "'@{variables('DonorfyLotteryPurpose')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryCampaign": {
+								"value": "'@{variables('DonorfyLotteryCampaign')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryTagCategory": {
+								"value": "'@{variables('DonorfyLotteryTagCategory')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryActiveTag": {
+								"value": "'@{variables('DonorfyLotteryActiveTag')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryCancelledTag": {
+								"value": "'@{variables('DonorfyLotteryCancelledTag')}'",
+								"type": "Expression"
+							},
+							"DonorfyDeceasedReason": {
+								"value": "'@{variables('DonorfyDeceasedReason')}'",
+								"type": "Expression"
+							},
+							"DonorfyGoneAwayReason": {
+								"value": "'@{variables('DonorfyGoneAwayReason')}'",
+								"type": "Expression"
+							},
+							"DonorfyBankAccount": {
+								"value": "'@{variables('DonorfyBankAccount')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryProduct": {
+								"value": "'@{variables('DonorfyLotteryProduct')}'",
+								"type": "Expression"
+							},
+							"DonorfyFund": {
+								"value": "'@{variables('DonorfyFund')}'",
+								"type": "Expression"
+							},
+							"DonorfyDefaultPaymentMethod": {
+								"value": "'@{variables('DonorfyDefaultPaymentMethod')}'",
+								"type": "Expression"
+							},
+							"RunDate": "currentDate()",
+							"DonorfyDepartment": {
+								"value": "'@{variables('DonorfyDepartment')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryWinnerTag": {
+								"value": "'@{variables('DonorfyLotteryWinnerTag')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotterySelfExcludeTag": {
+								"value": "'@{variables('DonorfyLotterySelfExcludeTag')}'",
+								"type": "Expression"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Set DonorfyKeyPrefix",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotterySettings",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyKeyPrefix",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyKeyPrefix)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetDonorfyDepartment",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyTransactionDefaults",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyDepartment",
+					"value": {
+						"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyDepartment)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryWinnerTag",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotteryTags",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotteryWinnerTag",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryWinnerTag)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set DonorfyLotteryDonorfyLotterySelfExcludeTag",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupDonorfyLotteryTags",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DonorfyLotterySelfExcludeTag",
+					"value": {
+						"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotterySelfExcludeTag)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LookupAPIDetails",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT un.[Value] AS APIUserName, ak.[Value] as APIAccessKey\n  FROM [integration].[IntegrationImportSettings] un\n  INNER JOIN [integration].[IntegrationImportSettings] ak\n  ON ak.TenantCode = un.TenantCode\n  AND ak.IntegrationName = un.IntegrationName\n  AND ak.[Key] = 'APIAccessKey'\n  WHERE un.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND un.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND un.[Key] = 'APIUserName'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLIntegrationImportSettings",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"TenantCode": {
+				"type": "string",
+				"defaultValue": "ZRTXSIYSU7"
+			},
+			"IntegrationName": {
+				"type": "string",
+				"defaultValue": "NWAASterlingLottery"
+			},
+			"ErrorAlertDestinationWebhooks": {
+				"type": "string",
+				"defaultValue": [
+					"https://mastict.webhook.office.com/webhookb2/fe4903b3-4a31-4a06-a361-e45caa7cbf88@93183a8b-45b8-4208-a95c-26fb477572e5/IncomingWebhook/6f63b1d955bd48eab46d10fa6b66bcaa/a112ca9c-4af6-4af5-a5db-5c8b6f213a31"
+				]
+			},
+			"Subscription": {
+				"type": "string",
+				"defaultValue": "f92b78e2-ea05-4117-880b-1c4ba8755802"
+			},
+			"ResourceGroup": {
+				"type": "string",
+				"defaultValue": "NWAA_DONORFY"
+			}
+		},
+		"variables": {
+			"DonorfyKeyPrefix": {
+				"type": "String"
+			},
+			"APIUserName": {
+				"type": "String"
+			},
+			"DonorfyKeyStorageType": {
+				"type": "String"
+			},
+			"DonorfyKeyStorageLocation": {
+				"type": "String"
+			},
+			"DonorfyLotteryPurpose": {
+				"type": "String"
+			},
+			"DonorfyLotteryCampaign": {
+				"type": "String"
+			},
+			"DonorfyLotteryTagCategory": {
+				"type": "String"
+			},
+			"DonorfyLotteryActiveTag": {
+				"type": "String"
+			},
+			"DonorfyLotteryCancelledTag": {
+				"type": "String"
+			},
+			"DonorfyDeceasedReason": {
+				"type": "String"
+			},
+			"DonorfyGoneAwayReason": {
+				"type": "String"
+			},
+			"DonorfyBankAccount": {
+				"type": "String"
+			},
+			"DonorfyLotteryProduct": {
+				"type": "String"
+			},
+			"DonorfyFund": {
+				"type": "String"
+			},
+			"DonorfyDefaultPaymentMethod": {
+				"type": "String"
+			},
+			"NumberOfRunsToKeep": {
+				"type": "String"
+			},
+			"APIAccessKey": {
+				"type": "String"
+			},
+			"NumberProcessedEachLoop": {
+				"type": "String"
+			},
+			"DonorfyDepartment": {
+				"type": "String"
+			},
+			"DonorfyLotteryWinnerTag": {
+				"type": "String"
+			},
+			"DonorfyLotterySelfExcludeTag": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-02-26T17:09:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

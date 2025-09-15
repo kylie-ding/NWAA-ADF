@@ -1,0 +1,128 @@
+{
+	"name": "AzureSQLImportTransactionsAdditionalAllocations",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "NWAAAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "TransactionAllocationsImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TenantCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IntegrationName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineRunId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IntegrationSourceConstituentKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProcessedRecord",
+				"type": "bit"
+			},
+			{
+				"name": "FK_TransactionsImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Amount",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "Product",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Quantity",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "Fund",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Department",
+				"type": "nvarchar"
+			},
+			{
+				"name": "AllocationDate",
+				"type": "date"
+			},
+			{
+				"name": "GiftAidFlag",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Comments",
+				"type": "nvarchar"
+			},
+			{
+				"name": "BeneficiaryConstituentExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "BeneficiaryConstituentConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "ExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FK_Product",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Fund",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_DepartmentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Currency",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_TenantId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IntegrationSourceTransactionKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CanRecoverTax",
+				"type": "bit"
+			}
+		],
+		"typeProperties": {
+			"schema": "integration",
+			"table": "Import_Transaction_Additional_Allocations"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

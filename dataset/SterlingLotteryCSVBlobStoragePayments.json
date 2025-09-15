@@ -1,0 +1,48 @@
+{
+	"name": "SterlingLotteryCSVBlobStoragePayments",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "sterling-lottery-blobs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Membership ID",
+				"type": "String"
+			},
+			{
+				"name": "Lottery Number",
+				"type": "String"
+			},
+			{
+				"name": "Payment Method",
+				"type": "String"
+			},
+			{
+				"name": "Lottery Payment Amount",
+				"type": "String"
+			},
+			{
+				"name": "Total Payment Amount",
+				"type": "String"
+			},
+			{
+				"name": "Payment Date",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,101 @@
+{
+	"name": "AzureSQLImportPurposes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "NWAAAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "PurposesImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TenantCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IntegrationName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineRunId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IntegrationSourceConstituentKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProcessedRecord",
+				"type": "bit"
+			},
+			{
+				"name": "ExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Purpose",
+				"type": "nvarchar"
+			},
+			{
+				"name": "OptIn",
+				"type": "bit"
+			},
+			{
+				"name": "OptOut",
+				"type": "bit"
+			},
+			{
+				"name": "Unknown",
+				"type": "bit"
+			},
+			{
+				"name": "DateReceived",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "CommsPrefId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_TenantId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_ConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_PreferenceType",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "ContactChannelDetails",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Confirmed",
+				"type": "bit"
+			},
+			{
+				"name": "Allowed",
+				"type": "bit"
+			}
+		],
+		"typeProperties": {
+			"schema": "integration",
+			"table": "Import_Purposes"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

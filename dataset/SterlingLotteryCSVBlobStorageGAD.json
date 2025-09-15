@@ -1,0 +1,96 @@
+{
+	"name": "SterlingLotteryCSVBlobStorageGAD",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "sterling-lottery-blobs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "membershipID",
+				"type": "String"
+			},
+			{
+				"name": "clientMemberID",
+				"type": "String"
+			},
+			{
+				"name": "title",
+				"type": "String"
+			},
+			{
+				"name": "firstname",
+				"type": "String"
+			},
+			{
+				"name": "surname",
+				"type": "String"
+			},
+			{
+				"name": "address1",
+				"type": "String"
+			},
+			{
+				"name": "address2",
+				"type": "String"
+			},
+			{
+				"name": "address3",
+				"type": "String"
+			},
+			{
+				"name": "town",
+				"type": "String"
+			},
+			{
+				"name": "county",
+				"type": "String"
+			},
+			{
+				"name": "country",
+				"type": "String"
+			},
+			{
+				"name": "postcode",
+				"type": "String"
+			},
+			{
+				"name": "giftAidDate",
+				"type": "String"
+			},
+			{
+				"name": "hasDonationAccount",
+				"type": "String"
+			},
+			{
+				"name": "donationAccountType",
+				"type": "String"
+			},
+			{
+				"name": "donationSource",
+				"type": "String"
+			},
+			{
+				"name": "donationTotal",
+				"type": "String"
+			},
+			{
+				"name": "donationBalance",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

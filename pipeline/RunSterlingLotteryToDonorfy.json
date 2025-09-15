@@ -1,0 +1,308 @@
+{
+	"name": "RunSterlingLotteryToDonorfy",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata Blob Storage Input Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "SterlingLotteryCSVBlobStorageContainer",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Set AllFilesExist",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata Blob Storage Input Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "AllFilesExist",
+					"value": {
+						"value": "@and(\nand(\n  greater(\n    indexOf(\n      string(join(activity('Get Metadata Blob Storage Input Files').output.childItems,','))\n      ,'All Member Export'\n    )\n    ,-1\n  ),\n  greater(\n    indexOf(\n      string(join(activity('Get Metadata Blob Storage Input Files').output.childItems,','))\n      ,'Members with giftaid'\n    )\n    ,-1\n  )  \n),\nand(\n  greater(\n    indexOf(\n      string(join(activity('Get Metadata Blob Storage Input Files').output.childItems,','))\n      ,'NWAA - Payment Export'\n    )\n    ,-1\n  ),\n  greater(\n    indexOf(\n      string(join(activity('Get Metadata Blob Storage Input Files').output.childItems,','))\n      ,'Winning Numbers'\n    )\n    ,-1\n  )  \n)\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If All Files Exist",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set AllFilesExist",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('AllFilesExist')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute Send Teams Alert",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "SendAlertToTeamsChannel",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"subscription": {
+										"value": "@variables('Subscription')",
+										"type": "Expression"
+									},
+									"resourceGroup": {
+										"value": "@variables('ResourceGroup')",
+										"type": "Expression"
+									},
+									"runId": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"name": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"triggerTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"status": "Files not ready to process",
+									"message": "The integration run did not complete as the files were not in place to process",
+									"teamWebhookUrls": {
+										"value": "@variables('AlertDestinationWebhooks')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execute SterlingLotteryToDonorfy",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "SterlingLotteryToDonorfy",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TenantCode": "ZRTXSIYSU7",
+									"IntegrationName": "NWAASterlingLottery",
+									"ErrorAlertDestinationWebhooks": {
+										"value": "@variables('ErrorAlertDestinationWebhooks')",
+										"type": "Expression"
+									},
+									"Subscription": {
+										"value": "@variables('Subscription')",
+										"type": "Expression"
+									},
+									"ResourceGroup": {
+										"value": "@variables('ResourceGroup')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Execute Send Teams Alert Error",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set CleanedErrorMessage",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "SendAlertToTeamsChannel",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"subscription": {
+										"value": "@variables('Subscription')",
+										"type": "Expression"
+									},
+									"resourceGroup": {
+										"value": "@variables('ResourceGroup')",
+										"type": "Expression"
+									},
+									"runId": {
+										"value": "@activity('Execute SterlingLotteryToDonorfy').output['pipelineRunId']",
+										"type": "Expression"
+									},
+									"name": {
+										"value": "@activity('Execute SterlingLotteryToDonorfy').output['pipelineName']",
+										"type": "Expression"
+									},
+									"triggerTime": {
+										"value": "@activity('Execute SterlingLotteryToDonorfy').ExecutionStartTime",
+										"type": "Expression"
+									},
+									"status": {
+										"value": "@activity('Execute SterlingLotteryToDonorfy').Status",
+										"type": "Expression"
+									},
+									"message": {
+										"value": "@variables('CleanedErrorMessage')",
+										"type": "Expression"
+									},
+									"executionEndTime": {
+										"value": "@activity('Execute SterlingLotteryToDonorfy').ExecutionEndTime",
+										"type": "Expression"
+									},
+									"runDuration": {
+										"value": "@activity('Execute SterlingLotteryToDonorfy').Duration",
+										"type": "Expression"
+									},
+									"teamWebhookUrls": {
+										"value": "@variables('ErrorAlertDestinationWebhooks')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Set ErrorMessage",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Execute SterlingLotteryToDonorfy",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ErrorMessage",
+								"value": {
+									"value": "@activity('Execute SterlingLotteryToDonorfy').Error['message']",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set CleanedErrorMessage",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set ErrorMessage",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "CleanedErrorMessage",
+								"value": {
+									"value": "@replace(replace(replace(replace(variables('ErrorMessage'),'{',''),'}',''),'\\\"',''),'\"','')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"AllFilesExist": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"ErrorMessage": {
+				"type": "String"
+			},
+			"CleanedErrorMessage": {
+				"type": "String"
+			},
+			"ErrorAlertDestinationWebhooks": {
+				"type": "Array",
+				"defaultValue": [
+					"https://prod-183.westeurope.logic.azure.com:443/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VQcZgnZyLTJmB867uruebwIH6DcGzw3k0tagj6PAzo"
+				]
+			},
+			"AlertDestinationWebhooks": {
+				"type": "Array",
+				"defaultValue": [
+					"https://prod-183.westeurope.logic.azure.com:443/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VQcZgnZyLTJmB867uruebwIH6DcGzw3k0tagj6PAzo"
+				]
+			},
+			"Subscription": {
+				"type": "String",
+				"defaultValue": "f92b78e2-ea05-4117-880b-1c4ba8755802"
+			},
+			"ResourceGroup": {
+				"type": "String",
+				"defaultValue": "NWAA_DONORFY"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-04-10T17:26:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

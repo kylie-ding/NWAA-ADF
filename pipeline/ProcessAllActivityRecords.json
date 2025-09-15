@@ -1,0 +1,238 @@
+{
+	"name": "ProcessAllActivityRecords",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Initial Unprocessed Record Count",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT COUNT(*) AS UnprocessedRecordCount\nFROM integration.Import_Activities\nWHERE ProcessedRecord = 0\nAND ConstituentId IS NOT NULL\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().parameters.CallingPipelineName}'\nAND ADFPipelineRunId = '@{pipeline().parameters.CallingPipelineRunId}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSQLImportConstituents",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set Initial UnprocessedRecordCount",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Initial Unprocessed Record Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "UnprocessedRecords",
+					"value": {
+						"value": "@string(activity('Get Initial Unprocessed Record Count').output.firstRow.UnprocessedRecordCount)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Until All Processed",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Set Initial UnprocessedRecordCount",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('UnprocessedRecords'),'0')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "If Unprocessed Records",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@not(equals(variables('UnprocessedRecords'),'0'))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Get Unprocessed Record Count",
+										"type": "Lookup",
+										"dependsOn": [
+											{
+												"activity": "Azure Function Activity Load",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "SELECT COUNT(*) AS UnprocessedRecordCount\nFROM integration.Import_Activities\nWHERE ProcessedRecord = 0\nAND ConstituentId IS NOT NULL\nAND TenantCode = '@{pipeline().parameters.TenantCode}'\nAND IntegrationName = '@{pipeline().parameters.IntegrationName}'\nAND ADFPipelineName = '@{pipeline().parameters.CallingPipelineName}'\nAND ADFPipelineRunId = '@{pipeline().parameters.CallingPipelineRunId}'",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "AzureSQLImportConstituents",
+												"type": "DatasetReference"
+											}
+										}
+									},
+									{
+										"name": "Set UnprocessedRecordCount",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Get Unprocessed Record Count",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "UnprocessedRecords",
+											"value": {
+												"value": "@string(activity('Get Unprocessed Record Count').output.firstRow.UnprocessedRecordCount)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Set UnprocessedRecordCount to 0 On Failure",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Azure Function Activity Load",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "UnprocessedRecords",
+											"value": {
+												"value": "0",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Azure Function Activity Load",
+										"type": "AzureFunctionActivity",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 3,
+											"retryIntervalInSeconds": 60,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"functionName": "LoadDonorfyActivities",
+											"body": {
+												"value": "{\"RunId\": \"@{pipeline().parameters.CallingPipelineRunId}\",\n\"PipelineName\" : \"@{pipeline().parameters.CallingPipelineName}\",\n\"IntegrationName\" : \"@{pipeline().parameters.IntegrationName}\",\n\"DonorfyAPIKey\" : \"@{pipeline().parameters.TenantCode}\",\n\"DonorfyAPIAccessKey\" : \"@{pipeline().parameters.APIAccessKey}\",\n\"DonorfyAPIUsername\" : \"@{pipeline().parameters.APIUserName}\",\n\"BreakBeforeTimeoutSeconds\" : \"230\"\n}",
+												"type": "Expression"
+											},
+											"method": "POST"
+										},
+										"linkedServiceName": {
+											"referenceName": "DonorfyIngegrationAzureFunction",
+											"type": "LinkedServiceReference"
+										}
+									}
+								]
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"APIUserName": {
+				"type": "string",
+				"defaultValue": "Mast Azure Data Factory"
+			},
+			"TenantCode": {
+				"type": "string",
+				"defaultValue": "ZRTXSIYSU7"
+			},
+			"IntegrationName": {
+				"type": "string",
+				"defaultValue": "NWAASterlingLottery"
+			},
+			"CallingPipelineName": {
+				"type": "string",
+				"defaultValue": "SterlingLotteryToDonorfy"
+			},
+			"CallingPipelineRunId": {
+				"type": "string",
+				"defaultValue": "7c3716f6-896d-4190-bff0-4ae4dd63afda"
+			},
+			"APIAccessKey": {
+				"type": "string",
+				"defaultValue": "-_7S_3Wy8U@6?snX@x5Q08u?N"
+			}
+		},
+		"variables": {
+			"UnprocessedRecords": {
+				"type": "String",
+				"defaultValue": "0"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-06-05T13:53:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

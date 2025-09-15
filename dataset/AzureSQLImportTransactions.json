@@ -1,0 +1,211 @@
+{
+	"name": "AzureSQLImportTransactions",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "NWAAAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "TransactionsImportId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TenantCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IntegrationName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADFPipelineRunId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "IntegrationSourceConstituentKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProcessedRecord",
+				"type": "bit"
+			},
+			{
+				"name": "TransactionNumber1",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TransactionNumber2",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "GiftAidFlag",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Campaign",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DateOfTransaction",
+				"type": "date"
+			},
+			{
+				"name": "Amount",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "Product",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PaymentMethod",
+				"type": "nvarchar"
+			},
+			{
+				"name": "BankAccount",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Fund",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Currency",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Reference",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Comments",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SegmentCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Channel",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ConnectedConstituentExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "BeneficiaryConstituentExternalKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "TransactionId1",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "TransactionId2",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_PaymentMethod",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_BankAccount",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Product",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Fund",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Currency",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_Campaign",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_TenantId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "FK_ChannelId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "ConnectedConstituentConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "BeneficiaryConstituentConstituentId",
+				"type": "uniqueidentifier"
+			},
+			{
+				"name": "Quantity",
+				"type": "decimal",
+				"precision": 9,
+				"scale": 2
+			},
+			{
+				"name": "FileName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProcessingCostsAmount",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "ErrorMessage",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Department",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PayoutReference",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IntegrationSourceTransactionKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CanRecoverTax",
+				"type": "bit"
+			}
+		],
+		"typeProperties": {
+			"schema": "integration",
+			"table": "Import_Transactions"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

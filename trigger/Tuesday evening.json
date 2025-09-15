@@ -1,0 +1,35 @@
+{
+	"name": "Tuesday evening",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "RunSterlingLotteryToDonorfy",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2025-05-13T16:08:00",
+				"timeZone": "GMT Standard Time",
+				"schedule": {
+					"minutes": [
+						7
+					],
+					"hours": [
+						18
+					],
+					"weekDays": [
+						"Tuesday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,101 @@
+{
+	"name": "SterlingLotteryCSVBlobStorageConstituentLogFile",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@concat('Constituent Log File ', utcNow('yyyyMMdd hhm'),'.csv')",
+					"type": "Expression"
+				},
+				"folderPath": "Log Files",
+				"container": "sterling-lottery-blobs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "MembershipID",
+				"type": "String"
+			},
+			{
+				"name": "LotteryNum",
+				"type": "String"
+			},
+			{
+				"name": "FullName",
+				"type": "String"
+			},
+			{
+				"name": "Address1",
+				"type": "String"
+			},
+			{
+				"name": "Address2",
+				"type": "String"
+			},
+			{
+				"name": "Address3",
+				"type": "String"
+			},
+			{
+				"name": "Town",
+				"type": "String"
+			},
+			{
+				"name": "Postcode",
+				"type": "String"
+			},
+			{
+				"name": "Phone Number",
+				"type": "String"
+			},
+			{
+				"name": "Mobile",
+				"type": "String"
+			},
+			{
+				"name": "Email",
+				"type": "String"
+			},
+			{
+				"name": "Alternative Email",
+				"type": "String"
+			},
+			{
+				"name": "Payment Method",
+				"type": "String"
+			},
+			{
+				"name": "PrizeValue",
+				"type": "String"
+			},
+			{
+				"name": "Cheque No",
+				"type": "String"
+			},
+			{
+				"name": "Publicity",
+				"type": "String"
+			},
+			{
+				"name": "Supported Charity",
+				"type": "String"
+			},
+			{
+				"name": "Rollover Prize",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
