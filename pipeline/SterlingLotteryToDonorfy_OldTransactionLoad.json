@@ -514,7 +514,10 @@
 								"value": "'@{pipeline().RunId}'",
 								"type": "Expression"
 							},
-							"DonorfyKeyPrefix": "'SL'",
+							"DonorfyKeyPrefix": {
+								"value": "'@{variables('DonorfyKeyPrefix')}'",
+								"type": "Expression"
+							},
 							"DonorfyLotteryPurpose": "'Lottery Comms'",
 							"DonorfyLotteryCampaign": "'Lift Off Lotto'",
 							"DonorfyLotteryTagCategory": "'Lottery'",
