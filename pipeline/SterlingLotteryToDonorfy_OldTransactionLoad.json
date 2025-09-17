@@ -526,7 +526,10 @@
 								"value": "'@{variables('DonorfyLotteryCampaign')}'",
 								"type": "Expression"
 							},
-							"DonorfyLotteryTagCategory": "'Lottery'",
+							"DonorfyLotteryTagCategory": {
+								"value": "'@{variables('DonorfyLotteryTagCategory')}'",
+								"type": "Expression"
+							},
 							"DonorfyLotteryActiveTag": "'Lottery Member'",
 							"DonorfyLotteryCancelledTag": "'Cancelled Lottery Member'",
 							"DonorfyDeceasedReason": "'Deceased'",
