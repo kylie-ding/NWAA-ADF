@@ -522,7 +522,10 @@
 								"value": "'@{variables('DonorfyLotteryPurpose')}'",
 								"type": "Expression"
 							},
-							"DonorfyLotteryCampaign": "'Lift Off Lotto'",
+							"DonorfyLotteryCampaign": {
+								"value": "'@{variables('DonorfyLotteryCampaign')}'",
+								"type": "Expression"
+							},
 							"DonorfyLotteryTagCategory": "'Lottery'",
 							"DonorfyLotteryActiveTag": "'Lottery Member'",
 							"DonorfyLotteryCancelledTag": "'Cancelled Lottery Member'",
