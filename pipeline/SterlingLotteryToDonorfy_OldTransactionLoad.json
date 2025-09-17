@@ -530,8 +530,14 @@
 								"value": "'@{variables('DonorfyLotteryTagCategory')}'",
 								"type": "Expression"
 							},
-							"DonorfyLotteryActiveTag": "'Lottery Member'",
-							"DonorfyLotteryCancelledTag": "'Cancelled Lottery Member'",
+							"DonorfyLotteryActiveTag": {
+								"value": "'@{variables('DonorfyLotteryActiveTag')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryCancelledTag": {
+								"value": "'@{variables('DonorfyLotteryCancelledTag')}'",
+								"type": "Expression"
+							},
 							"DonorfyDeceasedReason": "'Deceased'",
 							"DonorfyGoneAwayReason": "'Gone away'",
 							"DonorfyBankAccount": "'Co-Op - Main Account'",
