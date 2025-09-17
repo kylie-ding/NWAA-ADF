@@ -510,7 +510,10 @@
 								"value": "'@{pipeline().Pipeline}'",
 								"type": "Expression"
 							},
-							"ADFPipelineRunId": "''",
+							"ADFPipelineRunId": {
+								"value": "'@{pipeline().RunId}'",
+								"type": "Expression"
+							},
 							"DonorfyKeyPrefix": "'SL'",
 							"DonorfyLotteryPurpose": "'Lottery Comms'",
 							"DonorfyLotteryCampaign": "'Lift Off Lotto'",
