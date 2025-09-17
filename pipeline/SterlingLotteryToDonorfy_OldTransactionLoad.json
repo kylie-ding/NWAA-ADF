@@ -495,94 +495,31 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "SterlingLottery_to_DonorfyStaging",
+						"referenceName": "SterlingLottery_to_DonorfyStaging_OldTransactions",
 						"type": "DataFlowReference",
 						"parameters": {
-							"DonorfyTenantCode": {
-								"value": "'@{pipeline().parameters.TenantCode}'",
-								"type": "Expression"
-							},
-							"IntegrationName": {
-								"value": "'@{pipeline().parameters.IntegrationName}'",
-								"type": "Expression"
-							},
-							"ADFPipelineName": {
-								"value": "'@{pipeline().Pipeline}'",
-								"type": "Expression"
-							},
-							"ADFPipelineRunId": {
-								"value": "'@{pipeline().RunId}'",
-								"type": "Expression"
-							},
-							"DonorfyKeyPrefix": {
-								"value": "'@{variables('DonorfyKeyPrefix')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryPurpose": {
-								"value": "'@{variables('DonorfyLotteryPurpose')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryCampaign": {
-								"value": "'@{variables('DonorfyLotteryCampaign')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryTagCategory": {
-								"value": "'@{variables('DonorfyLotteryTagCategory')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryActiveTag": {
-								"value": "'@{variables('DonorfyLotteryActiveTag')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryCancelledTag": {
-								"value": "'@{variables('DonorfyLotteryCancelledTag')}'",
-								"type": "Expression"
-							},
-							"DonorfyDeceasedReason": {
-								"value": "'@{variables('DonorfyDeceasedReason')}'",
-								"type": "Expression"
-							},
-							"DonorfyGoneAwayReason": {
-								"value": "'@{variables('DonorfyGoneAwayReason')}'",
-								"type": "Expression"
-							},
-							"DonorfyBankAccount": {
-								"value": "'@{variables('DonorfyBankAccount')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryProduct": {
-								"value": "'@{variables('DonorfyLotteryProduct')}'",
-								"type": "Expression"
-							},
-							"DonorfyFund": {
-								"value": "'@{variables('DonorfyFund')}'",
-								"type": "Expression"
-							},
-							"DonorfyDefaultPaymentMethod": {
-								"value": "'@{variables('DonorfyDefaultPaymentMethod')}'",
-								"type": "Expression"
-							},
+							"DonorfyTenantCode": "'ZRTXSIYSU7'",
+							"IntegrationName": "'NWAASterlingLottery'",
+							"ADFPipelineName": "''",
+							"ADFPipelineRunId": "''",
+							"DonorfyKeyPrefix": "'SL'",
+							"DonorfyLotteryPurpose": "'Lottery Comms'",
+							"DonorfyLotteryCampaign": "'Lift Off Lotto'",
+							"DonorfyLotteryTagCategory": "'Lottery'",
+							"DonorfyLotteryActiveTag": "'Lottery Member'",
+							"DonorfyLotteryCancelledTag": "'Cancelled Lottery Member'",
+							"DonorfyDeceasedReason": "'Deceased'",
+							"DonorfyGoneAwayReason": "'Gone away'",
+							"DonorfyBankAccount": "'Co-Op - Main Account'",
+							"DonorfyLotteryProduct": "'Lottery Payment'",
+							"DonorfyFund": "'Unrestricted'",
+							"DonorfyDefaultPaymentMethod": "'Unknown'",
 							"RunDate": "currentDate()",
-							"DonorfyDepartment": {
-								"value": "'@{variables('DonorfyDepartment')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotteryWinnerTag": {
-								"value": "'@{variables('DonorfyLotteryWinnerTag')}'",
-								"type": "Expression"
-							},
-							"DonorfyLotterySelfExcludeTag": {
-								"value": "'@{variables('DonorfyLotterySelfExcludeTag')}'",
-								"type": "Expression"
-							},
-							"DonorfyDonationProduct": {
-								"value": "'@{variables('DonorfyDonationProduct')}'",
-								"type": "Expression"
-							},
-							"DonorfyGADMethod": {
-								"value": "'@{variables('DonorfyGADDeclarationMethod')}'",
-								"type": "Expression"
-							}
+							"DonorfyDepartment": "'Lottery'",
+							"DonorfyLotteryWinnerTag": "'Lottery Winner'",
+							"DonorfyLotterySelfExcludeTag": "'Lottery Self Exclusion'",
+							"DonorfyDonationProduct": "'Donation'",
+							"DonorfyGADMethod": "'Written'"
 						}
 					},
 					"compute": {
