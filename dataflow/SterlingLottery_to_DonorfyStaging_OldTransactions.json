@@ -72,6 +72,9 @@
 				},
 				{
 					"name": "derivedTransactionDonationColumns"
+				},
+				{
+					"name": "derivedIntegrationColumns"
 				}
 			],
 			"scriptLines": [
@@ -200,7 +203,7 @@
 				"          OKToSMS = case({Charity Marketing - SMS} ==\"Opt Out\", 0, {Charity Marketing - SMS}==\"Opt In\",1),",
 				"          ConstituentType = \"Individual\",",
 				"          DateAdded = $RunDate) ~> derivedConstituentColumns",
-				"SterlingLotteryInBlobStorage derive(CreatedDateDateType = toDate({Created Date},\"dd/mm/yyyy\")) ~> derivedDateColumn",
+				"derivedIntegrationColumns derive(CreatedDateDateType = toDate({Created Date},\"dd/mm/yyyy\")) ~> derivedDateColumn",
 				"derivedDateColumn derive(Campaign = case(year(CreatedDateDateType)<=2017,\"Lottery Income - Historic\",\r",
 				"SourceCode==\"LOTENG\",\"Lottery Income - Tower Sign Up\",\r",
 				"SourceCode==\"LOTGEN\" ||SourceCode==\"Unknown\",\"Lottery Income - Tower Sign Up\",\r",
@@ -231,6 +234,12 @@
 				"          Amount = {Lottery Payment Amount}) ~> derivedTransactionLotteryColumns",
 				"filterDonationAmount derive(AllocationProduct = $DonorfyDonationProduct,",
 				"          AllocationAmount = toDecimal({Total Payment Amount}) - toDecimal({Lottery Payment Amount})) ~> derivedTransactionDonationColumns",
+				"SterlingLotteryInBlobStorage derive(TenantCode = $DonorfyTenantCode,",
+				"          IntegrationName = $IntegrationName,",
+				"          ADFPipelineName = $ADFPipelineName,",
+				"          ADFPipelineRunId = $ADFPipelineRunId,",
+				"          IntegrationSourceConstituentKey = concat($DonorfyKeyPrefix,{Player ID}),",
+				"          ProcessedRecord = 0) ~> derivedIntegrationColumns",
 				"derivedConstituentColumns sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
