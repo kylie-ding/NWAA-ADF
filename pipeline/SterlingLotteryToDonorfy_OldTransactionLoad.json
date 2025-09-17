@@ -550,8 +550,14 @@
 								"value": "'@{variables('DonorfyBankAccount')}'",
 								"type": "Expression"
 							},
-							"DonorfyLotteryProduct": "'Lottery Payment'",
-							"DonorfyFund": "'Unrestricted'",
+							"DonorfyLotteryProduct": {
+								"value": "'@{variables('DonorfyLotteryProduct')}'",
+								"type": "Expression"
+							},
+							"DonorfyFund": {
+								"value": "'@{variables('DonorfyFund')}'",
+								"type": "Expression"
+							},
 							"DonorfyDefaultPaymentMethod": "'Unknown'",
 							"RunDate": "currentDate()",
 							"DonorfyDepartment": "'Lottery'",
