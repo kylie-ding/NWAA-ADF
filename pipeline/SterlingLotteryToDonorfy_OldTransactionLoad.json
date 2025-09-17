@@ -558,13 +558,31 @@
 								"value": "'@{variables('DonorfyFund')}'",
 								"type": "Expression"
 							},
-							"DonorfyDefaultPaymentMethod": "'Unknown'",
+							"DonorfyDefaultPaymentMethod": {
+								"value": "'@{variables('DonorfyDefaultPaymentMethod')}'",
+								"type": "Expression"
+							},
 							"RunDate": "currentDate()",
-							"DonorfyDepartment": "'Lottery'",
-							"DonorfyLotteryWinnerTag": "'Lottery Winner'",
-							"DonorfyLotterySelfExcludeTag": "'Lottery Self Exclusion'",
-							"DonorfyDonationProduct": "'Donation'",
-							"DonorfyGADMethod": "'Written'"
+							"DonorfyDepartment": {
+								"value": "'@{variables('DonorfyDepartment')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotteryWinnerTag": {
+								"value": "'@{variables('DonorfyLotteryWinnerTag')}'",
+								"type": "Expression"
+							},
+							"DonorfyLotterySelfExcludeTag": {
+								"value": "'@{variables('DonorfyLotterySelfExcludeTag')}'",
+								"type": "Expression"
+							},
+							"DonorfyDonationProduct": {
+								"value": "'@{variables('DonorfyDonationProduct')}'",
+								"type": "Expression"
+							},
+							"DonorfyGADMethod": {
+								"value": "'@{variables('DonorfyGADDeclarationMethod')}'",
+								"type": "Expression"
+							}
 						}
 					},
 					"compute": {
