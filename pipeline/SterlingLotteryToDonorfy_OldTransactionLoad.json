@@ -498,9 +498,18 @@
 						"referenceName": "SterlingLottery_to_DonorfyStaging_OldTransactions",
 						"type": "DataFlowReference",
 						"parameters": {
-							"DonorfyTenantCode": "'ZRTXSIYSU7'",
-							"IntegrationName": "'NWAASterlingLottery'",
-							"ADFPipelineName": "''",
+							"DonorfyTenantCode": {
+								"value": "'@{pipeline().parameters.TenantCode}'",
+								"type": "Expression"
+							},
+							"IntegrationName": {
+								"value": "'@{pipeline().parameters.IntegrationName}'",
+								"type": "Expression"
+							},
+							"ADFPipelineName": {
+								"value": "'@{pipeline().Pipeline}'",
+								"type": "Expression"
+							},
 							"ADFPipelineRunId": "''",
 							"DonorfyKeyPrefix": "'SL'",
 							"DonorfyLotteryPurpose": "'Lottery Comms'",
