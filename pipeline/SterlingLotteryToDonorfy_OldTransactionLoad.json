@@ -518,7 +518,10 @@
 								"value": "'@{variables('DonorfyKeyPrefix')}'",
 								"type": "Expression"
 							},
-							"DonorfyLotteryPurpose": "'Lottery Comms'",
+							"DonorfyLotteryPurpose": {
+								"value": "'@{variables('DonorfyLotteryPurpose')}'",
+								"type": "Expression"
+							},
 							"DonorfyLotteryCampaign": "'Lift Off Lotto'",
 							"DonorfyLotteryTagCategory": "'Lottery'",
 							"DonorfyLotteryActiveTag": "'Lottery Member'",
