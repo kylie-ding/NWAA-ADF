@@ -13387,6 +13387,895 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryToDonorfy_OldTransactionLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDonorfyLotterySettings",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT lp.[Value] AS DonorfyLotteryPurpose,\n  lc.[Value] AS DonorfyLotteryCampaign,\n  lpr.[Value] AS DonorfyLotteryProduct,\n  kp.[Value] AS DonorfyKeyPrefix,\n  dpr.[Value] AS DonorfyDonationProduct\n  FROM [integration].[IntegrationImportSettings] lp\n  INNER JOIN [integration].[IntegrationImportSettings] lc\n  ON  lc.TenantCode = lp.TenantCode\n  AND lc.IntegrationName = lp.IntegrationName\n  AND lc.[Key] = 'DonorfyLotteryCampaign'\n  INNER JOIN [integration].[IntegrationImportSettings] lpr\n  ON  lpr.TenantCode = lp.TenantCode\n  AND lpr.IntegrationName = lp.IntegrationName\n  AND lpr.[Key] = 'DonorfyLotteryProduct'\n  INNER JOIN [integration].[IntegrationImportSettings] dpr\n  ON  dpr.TenantCode = lp.TenantCode\n  AND dpr.IntegrationName = lp.IntegrationName\n  AND dpr.[Key] = 'DonorfyDonationProduct'\n  INNER JOIN [integration].[IntegrationImportSettings] kp\n  ON  kp.TenantCode = lp.TenantCode\n  AND kp.IntegrationName = lp.IntegrationName\n  AND kp.[Key] = 'DonorfyKeyPrefix'\n  WHERE lp.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND lp.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND lp.[Key] = 'DonorfyLotteryPurpose'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLIntegrationImportSettings",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryPurpose",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotterySettings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryPurpose",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyLotteryPurpose)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryCampaign",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotterySettings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryCampaign",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyLotteryCampaign)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "LookupDonorfyLotteryTags",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT dltc.[Value] AS DonorfyLotteryTagCategory,\n dat.Value AS DonorfyLotteryActiveTag,\n dct.Value AS DonorfyLotteryCancelledTag,\n dlwt.Value AS DonorfyLotteryWinnerTag,\n dlset.Value AS DonorfyLotterySelfExcludeTag\n  FROM [integration].[IntegrationImportSettings] dltc\n  INNER JOIN [integration].[IntegrationImportSettings] dat \n  ON dat.TenantCode = dltc.TenantCode\n  AND dat.IntegrationName = dltc.IntegrationName\n  AND dat.[Key] = 'DonorfyLotteryActiveTag'\n  INNER JOIN [integration].[IntegrationImportSettings] dct \n  ON dct.TenantCode = dltc.TenantCode\n  AND dct.IntegrationName = dltc.IntegrationName\n  AND dct.[Key] = 'DonorfyLotteryCancelledTag'\n  INNER JOIN [integration].[IntegrationImportSettings] dlwt \n  ON dlwt.TenantCode = dltc.TenantCode\n  AND dlwt.IntegrationName = dltc.IntegrationName\n  AND dlwt.[Key] = 'DonorfyLotteryWinnerTag'\n  INNER JOIN [integration].[IntegrationImportSettings] dlset \n  ON dlset.TenantCode = dltc.TenantCode\n  AND dlset.IntegrationName = dltc.IntegrationName\n  AND dlset.[Key] = 'DonorfyLotterySelfExcludeTag'\n  WHERE dltc.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND dltc.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND dltc.[Key] = 'DonorfyLotteryTagCategory'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLIntegrationImportSettings",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryTagCategory",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotteryTags",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryTagCategory",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryTagCategory)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryActiveTag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotteryTags",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryActiveTag",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryActiveTag)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryCancelledTag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotteryTags",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryCancelledTag",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryCancelledTag)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "LookupDonorfyReasons",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT ddr.[Value] AS DonorfyDeceasedReason,\n    dgar.[Value] AS DonorfyGoneAwayReason\n  FROM [integration].[IntegrationImportSettings] ddr\n  INNER JOIN [integration].[IntegrationImportSettings] dgar \n  ON dgar.TenantCode = ddr.TenantCode\n  AND dgar.IntegrationName = ddr.IntegrationName\n  AND dgar.[Key] = 'DonorfyGoneAwayReason'\n  WHERE ddr.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND ddr.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND ddr.[Key] = 'DonorfyDeceasedReason'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLIntegrationImportSettings",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyDeceasedReason",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyReasons",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyDeceasedReason",
+							"value": {
+								"value": "@string(activity('LookupDonorfyReasons').output.firstRow.DonorfyDeceasedReason)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyGoneAwayReason",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyReasons",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyGoneAwayReason",
+							"value": {
+								"value": "@string(activity('LookupDonorfyReasons').output.firstRow.DonorfyGoneAwayReason)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "LookupDonorfyTransactionDefaults",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT ba.[Value] AS DonorfyBankAccount,\n    f.[Value] AS DonorfyFund,\n    pm.[Value] As DonorfyDefaultPaymentMethod,\n    dd.[Value] As DonorfyDepartment\n  FROM [integration].[IntegrationImportSettings] ba\n  INNER JOIN [integration].[IntegrationImportSettings] f \n  ON f.TenantCode = ba.TenantCode\n  AND f.IntegrationName = ba.IntegrationName\n  AND f.[Key] = 'DonorfyFund'\n  INNER JOIN [integration].[IntegrationImportSettings] pm \n  ON pm.TenantCode = ba.TenantCode\n  AND pm.IntegrationName = ba.IntegrationName\n  AND pm.[Key] = 'DonorfyDefaultPaymentMethod'\n  INNER JOIN [integration].[IntegrationImportSettings] dd \n  ON dd.TenantCode = ba.TenantCode\n  AND dd.IntegrationName = ba.IntegrationName\n  AND dd.[Key] = 'DonorfyDepartment'\n  WHERE ba.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND ba.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND ba.[Key] = 'DonorfyBankAccount'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLIntegrationImportSettings",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "SetDonorfyBankAccount",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyTransactionDefaults",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyBankAccount",
+							"value": {
+								"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyBankAccount)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetDonorfyLotteryProduct",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotterySettings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryProduct",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyLotteryProduct)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetDonorfyFund",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyTransactionDefaults",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyFund",
+							"value": {
+								"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyFund)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetDonorfyDefaultPaymentMethod",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyTransactionDefaults",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyDefaultPaymentMethod",
+							"value": {
+								"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyDefaultPaymentMethod)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SterlingLottery_to_DonorfyStaging",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "SetDonorfyLotteryProduct",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryTagCategory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryCampaign",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryPurpose",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryActiveTag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryCancelledTag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyDeceasedReason",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyGoneAwayReason",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetDonorfyBankAccount",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetDonorfyFund",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetDonorfyDefaultPaymentMethod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyKeyPrefix",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetDonorfyDepartment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryWinnerTag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyLotteryDonorfyLotterySelfExcludeTag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetDonorfyDonationProduct",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set DonorfyGADDeclarationMethod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "SterlingLottery_to_DonorfyStaging_OldTransactions",
+								"type": "DataFlowReference",
+								"parameters": {
+									"DonorfyTenantCode": {
+										"value": "'@{pipeline().parameters.TenantCode}'",
+										"type": "Expression"
+									},
+									"IntegrationName": {
+										"value": "'@{pipeline().parameters.IntegrationName}'",
+										"type": "Expression"
+									},
+									"ADFPipelineName": {
+										"value": "'@{pipeline().Pipeline}'",
+										"type": "Expression"
+									},
+									"ADFPipelineRunId": {
+										"value": "'@{pipeline().RunId}'",
+										"type": "Expression"
+									},
+									"DonorfyKeyPrefix": {
+										"value": "'@{variables('DonorfyKeyPrefix')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryPurpose": {
+										"value": "'@{variables('DonorfyLotteryPurpose')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryCampaign": {
+										"value": "'@{variables('DonorfyLotteryCampaign')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryTagCategory": {
+										"value": "'@{variables('DonorfyLotteryTagCategory')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryActiveTag": {
+										"value": "'@{variables('DonorfyLotteryActiveTag')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryCancelledTag": {
+										"value": "'@{variables('DonorfyLotteryCancelledTag')}'",
+										"type": "Expression"
+									},
+									"DonorfyDeceasedReason": {
+										"value": "'@{variables('DonorfyDeceasedReason')}'",
+										"type": "Expression"
+									},
+									"DonorfyGoneAwayReason": {
+										"value": "'@{variables('DonorfyGoneAwayReason')}'",
+										"type": "Expression"
+									},
+									"DonorfyBankAccount": {
+										"value": "'@{variables('DonorfyBankAccount')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryProduct": {
+										"value": "'@{variables('DonorfyLotteryProduct')}'",
+										"type": "Expression"
+									},
+									"DonorfyFund": {
+										"value": "'@{variables('DonorfyFund')}'",
+										"type": "Expression"
+									},
+									"DonorfyDefaultPaymentMethod": {
+										"value": "'@{variables('DonorfyDefaultPaymentMethod')}'",
+										"type": "Expression"
+									},
+									"RunDate": "currentDate()",
+									"DonorfyDepartment": {
+										"value": "'@{variables('DonorfyDepartment')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotteryWinnerTag": {
+										"value": "'@{variables('DonorfyLotteryWinnerTag')}'",
+										"type": "Expression"
+									},
+									"DonorfyLotterySelfExcludeTag": {
+										"value": "'@{variables('DonorfyLotterySelfExcludeTag')}'",
+										"type": "Expression"
+									},
+									"DonorfyDonationProduct": {
+										"value": "'@{variables('DonorfyDonationProduct')}'",
+										"type": "Expression"
+									},
+									"DonorfyGADMethod": {
+										"value": "'@{variables('DonorfyGADDeclarationMethod')}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"SterlingLotteryInBlobStorage": {},
+									"SterlingLotteryPaymentsInBlobStorage": {},
+									"DonorfyConstituentImportStagingTable": {},
+									"DonorfyTransactionsImportStagingTable": {},
+									"DonorfyTransactionAdditionalAllocationssImportStagingTable": {}
+								},
+								"linkedServiceParameters": {}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Set DonorfyKeyPrefix",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotterySettings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyKeyPrefix",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyKeyPrefix)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetDonorfyDepartment",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyTransactionDefaults",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyDepartment",
+							"value": {
+								"value": "@string(activity('LookupDonorfyTransactionDefaults').output.firstRow.DonorfyDepartment)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryWinnerTag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotteryTags",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotteryWinnerTag",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotteryWinnerTag)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyLotteryDonorfyLotterySelfExcludeTag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotteryTags",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyLotterySelfExcludeTag",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotteryTags').output.firstRow.DonorfyLotterySelfExcludeTag)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetDonorfyDonationProduct",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyLotterySettings",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyDonationProduct",
+							"value": {
+								"value": "@string(activity('LookupDonorfyLotterySettings').output.firstRow.DonorfyDonationProduct)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "LookupDonorfyGADDefaults",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT dm.[Value] AS DonorfyGADDeclarationMethod\n  FROM [integration].[IntegrationImportSettings] dm\n  WHERE dm.TenantCode = '@{pipeline().parameters.TenantCode}'\n  AND dm.IntegrationName = '@{pipeline().parameters.IntegrationName}'\n  AND dm.[Key] = 'DonorfyGADDeclarationMethod'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSQLIntegrationImportSettings",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Set DonorfyGADDeclarationMethod",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LookupDonorfyGADDefaults",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DonorfyGADDeclarationMethod",
+							"value": {
+								"value": "@string(activity('LookupDonorfyGADDefaults').output.firstRow.DonorfyGADDeclarationMethod)",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"TenantCode": {
+						"type": "string",
+						"defaultValue": "ZRTXSIYSU7"
+					},
+					"IntegrationName": {
+						"type": "string",
+						"defaultValue": "NWAASterlingLottery"
+					},
+					"ErrorAlertDestinationWebhooks": {
+						"type": "string",
+						"defaultValue": [
+							"https://prod-183.westeurope.logic.azure.com:443/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VQcZgnZyLTJmB867uruebwIH6DcGzw3k0tagj6PAzo"
+						]
+					},
+					"Subscription": {
+						"type": "string",
+						"defaultValue": "f92b78e2-ea05-4117-880b-1c4ba8755802"
+					},
+					"ResourceGroup": {
+						"type": "string",
+						"defaultValue": "NWAA_DONORFY"
+					}
+				},
+				"variables": {
+					"DonorfyKeyPrefix": {
+						"type": "String"
+					},
+					"APIUserName": {
+						"type": "String"
+					},
+					"DonorfyKeyStorageType": {
+						"type": "String"
+					},
+					"DonorfyKeyStorageLocation": {
+						"type": "String"
+					},
+					"DonorfyLotteryPurpose": {
+						"type": "String"
+					},
+					"DonorfyLotteryCampaign": {
+						"type": "String"
+					},
+					"DonorfyLotteryTagCategory": {
+						"type": "String"
+					},
+					"DonorfyLotteryActiveTag": {
+						"type": "String"
+					},
+					"DonorfyLotteryCancelledTag": {
+						"type": "String"
+					},
+					"DonorfyDeceasedReason": {
+						"type": "String"
+					},
+					"DonorfyGoneAwayReason": {
+						"type": "String"
+					},
+					"DonorfyBankAccount": {
+						"type": "String"
+					},
+					"DonorfyLotteryProduct": {
+						"type": "String"
+					},
+					"DonorfyFund": {
+						"type": "String"
+					},
+					"DonorfyDefaultPaymentMethod": {
+						"type": "String"
+					},
+					"NumberOfRunsToKeep": {
+						"type": "String"
+					},
+					"APIAccessKey": {
+						"type": "String"
+					},
+					"NumberProcessedEachLoop": {
+						"type": "String"
+					},
+					"DonorfyDepartment": {
+						"type": "String"
+					},
+					"DonorfyLotteryWinnerTag": {
+						"type": "String"
+					},
+					"DonorfyLotterySelfExcludeTag": {
+						"type": "String"
+					},
+					"DonorfyDonationProduct": {
+						"type": "String"
+					},
+					"DonorfyGADDeclarationMethod": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-04-10T16:37:47Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSQLIntegrationImportSettings')]",
+				"[concat(variables('factoryId'), '/dataflows/SterlingLottery_to_DonorfyStaging_OldTransactions')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureSQLImportActivities')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -17867,6 +18756,537 @@
 				"[concat(variables('factoryId'), '/datasets/AzureSQLImportTransactions')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSQLImportTransactionsAdditionalAllocations')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSQLImportGADs')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLottery_to_DonorfyStaging_OldTransactions')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "SterlingLotteryCSVBlobStorageMembers",
+								"type": "DatasetReference"
+							},
+							"name": "SterlingLotteryInBlobStorage"
+						},
+						{
+							"dataset": {
+								"referenceName": "SterlingLotteryCSVBlobStoragePayments",
+								"type": "DatasetReference"
+							},
+							"name": "SterlingLotteryPaymentsInBlobStorage"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSQLImportConstituents",
+								"type": "DatasetReference"
+							},
+							"name": "DonorfyConstituentImportStagingTable"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSQLImportTransactions",
+								"type": "DatasetReference"
+							},
+							"name": "DonorfyTransactionsImportStagingTable"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSQLImportTransactionsAdditionalAllocations",
+								"type": "DatasetReference"
+							},
+							"name": "DonorfyTransactionAdditionalAllocationssImportStagingTable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedConstituentColumns"
+						},
+						{
+							"name": "derivedDateColumn"
+						},
+						{
+							"name": "derivedCampaign"
+						},
+						{
+							"name": "joinPaymentsToIntegrationColumns"
+						},
+						{
+							"name": "derivedTransactionColumns"
+						},
+						{
+							"name": "RowNumber"
+						},
+						{
+							"name": "derivedColumnConstant"
+						},
+						{
+							"name": "filterDonationAmount"
+						},
+						{
+							"name": "derivedTransactionLotteryColumns"
+						},
+						{
+							"name": "derivedTransactionDonationColumns"
+						},
+						{
+							"name": "derivedIntegrationColumns"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     DonorfyTenantCode as string ('ZRTXSIYSU7'),",
+						"     IntegrationName as string ('NWAASterlingLottery'),",
+						"     ADFPipelineName as string (''),",
+						"     ADFPipelineRunId as string (''),",
+						"     DonorfyKeyPrefix as string ('SL'),",
+						"     DonorfyLotteryPurpose as string ('Lottery Comms'),",
+						"     DonorfyLotteryCampaign as string ('Lift Off Lotto'),",
+						"     DonorfyLotteryTagCategory as string ('Lottery'),",
+						"     DonorfyLotteryActiveTag as string ('Lottery Member'),",
+						"     DonorfyLotteryCancelledTag as string ('Cancelled Lottery Member'),",
+						"     DonorfyDeceasedReason as string ('Deceased'),",
+						"     DonorfyGoneAwayReason as string ('Gone away'),",
+						"     DonorfyBankAccount as string ('Co-Op - Main Account'),",
+						"     DonorfyLotteryProduct as string ('Lottery Payment'),",
+						"     DonorfyFund as string ('Unrestricted'),",
+						"     DonorfyDefaultPaymentMethod as string ('Unknown'),",
+						"     RunDate as date (currentDate()),",
+						"     DonorfyDepartment as string ('Lottery'),",
+						"     DonorfyLotteryWinnerTag as string ('Lottery Winner'),",
+						"     DonorfyLotterySelfExcludeTag as string ('Lottery Self Exclusion'),",
+						"     DonorfyDonationProduct as string ('Donation'),",
+						"     DonorfyGADMethod as string ('Written')",
+						"}",
+						"source(output(",
+						"          {Player ID} as string,",
+						"          {Client Member ID} as string,",
+						"          Title as string,",
+						"          FirstName as string,",
+						"          Surname as string,",
+						"          {Address 1} as string,",
+						"          {Address 2} as string,",
+						"          {Address 3} as string,",
+						"          {Address 4} as string,",
+						"          {Town / City} as string,",
+						"          County as string,",
+						"          Postcode as string,",
+						"          Phone as string,",
+						"          {E-mail} as string,",
+						"          Mobile as string,",
+						"          {Date of Birth} as string,",
+						"          {Created Date} as string,",
+						"          {Member Status} as string,",
+						"          {Cancelled Date} as string,",
+						"          {Cancelled Reason} as string,",
+						"          {Number of Numbers} as string,",
+						"          {Active Numbers} as string,",
+						"          {Inactive Numbers} as string,",
+						"          {Earliest Draw} as string,",
+						"          {Current Balance} as string,",
+						"          {Total Payments} as string,",
+						"          {Total Payments Amount} as string,",
+						"          {Total Winnings} as string,",
+						"          {Draws Dormant} as string,",
+						"          SourceCode as string,",
+						"          {Payment Frequency} as string,",
+						"          {Payment Method} as string,",
+						"          {Cash Round Reference} as string,",
+						"          {Payroll Round Reference} as string,",
+						"          {Bank Account} as string,",
+						"          {Modulus Check} as string,",
+						"          {Payment Status} as string,",
+						"          Canvasser as string,",
+						"          {Supported Charity} as string,",
+						"          {Lottery Mail} as string,",
+						"          Publicity as string,",
+						"          {Un-contactable (Gone Away)} as string,",
+						"          {No Cancellation Mail} as string,",
+						"          {Donor Number} as string,",
+						"          {Last Modified} as string,",
+						"          {Receipt Code} as string,",
+						"          Deceased as string,",
+						"          {Raffle Marketing - All} as string,",
+						"          {Organisation Imposed - Email} as string,",
+						"          {Direct Communication - Email} as string,",
+						"          {Charity Marketing - Email} as string,",
+						"          {FPS Registered - Email} as string,",
+						"          {TPS Registered - Home Telephone} as string,",
+						"          {Organisation Imposed - Home Telephone} as string,",
+						"          {Direct Communication - Home Telephone} as string,",
+						"          {FPS Registered - Home Telephone} as string,",
+						"          {Charity Marketing - Home Telephone} as string,",
+						"          {MPS Registered - Letter} as string,",
+						"          {FPS Registered - Letter} as string,",
+						"          {Direct Communication - Letter} as string,",
+						"          {Organisation Imposed - Letter} as string,",
+						"          {Charity Marketing - Letter} as string,",
+						"          {FPS Registered - Mobile} as string,",
+						"          {TPS Registered - Mobile} as string,",
+						"          {Direct Communication - Mobile} as string,",
+						"          {Charity Marketing - Mobile} as string,",
+						"          {Organisation Imposed - Mobile} as string,",
+						"          {FPS Registered - SMS} as string,",
+						"          {Charity Marketing - SMS} as string,",
+						"          {Direct Communication - SMS} as string,",
+						"          {Organisation Imposed - SMS} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     moveFiles: ['Input Files','Processed Files'],",
+						"     rowUrlColumn: 'FileName',",
+						"     wildcardPaths:['Input Files/All Member Export*.csv']) ~> SterlingLotteryInBlobStorage",
+						"source(output(",
+						"          {Membership ID} as string,",
+						"          {Lottery Number} as string,",
+						"          {Payment Method} as string,",
+						"          {Lottery Payment Amount} as string,",
+						"          {Total Payment Amount} as string,",
+						"          {Payment Date} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     moveFiles: ['Input Files','Processed Files'],",
+						"     wildcardPaths:['Input Files/NWAA - Payment Export*.csv']) ~> SterlingLotteryPaymentsInBlobStorage",
+						"derivedCampaign derive(IsActive = case({Un-contactable (Gone Away)}==\"Member is un-contactable\" || Deceased==\"Yes\",0),",
+						"          ArchiveReason = case(Deceased==\"Yes\",$DonorfyDeceasedReason,{Un-contactable (Gone Away)}==\"Member is un-contactable\",$DonorfyGoneAwayReason,\"\"),",
+						"          DateOfBirthDateType = toDate({Date of Birth}, \"dd/mm/yyyy\"),",
+						"          OkToEmail = case({Charity Marketing - Email}==\"Opt Out\", 0, {Charity Marketing - Email}==\"Opt In\",1),",
+						"          OkToMail = case({Charity Marketing - Letter}==\"Opt Out\", 0, {Charity Marketing - Letter}==\"Opt In\",1),",
+						"          OKToPhone = case({Charity Marketing - Home Telephone} ==\"Opt Out\", 0, {Charity Marketing - Home Telephone}==\"Opt In\",1),",
+						"          OKToSMS = case({Charity Marketing - SMS} ==\"Opt Out\", 0, {Charity Marketing - SMS}==\"Opt In\",1),",
+						"          ConstituentType = \"Individual\",",
+						"          DateAdded = $RunDate) ~> derivedConstituentColumns",
+						"derivedIntegrationColumns derive(CreatedDateDateType = toDate({Created Date},\"dd/mm/yyyy\")) ~> derivedDateColumn",
+						"derivedDateColumn derive(Campaign = case(year(CreatedDateDateType)<=2017,\"Lottery Income - Historic\",\r",
+						"SourceCode==\"LOTENG\",\"Lottery Income - Tower Sign Up\",\r",
+						"SourceCode==\"LOTGEN\" ||SourceCode==\"Unknown\",\"Lottery Income - Tower Sign Up\",\r",
+						"SourceCode==\"WEB\",\"Lottery Income - Web Sign Up\",\r",
+						"SourceCode==\"LOTRAP\",\"Lottery Income - Web Sign Up\",\r",
+						"SourceCode==\"LOTPAP\",\"Lottery Income - Paper Sign Up\",\r",
+						"SourceCode==\"Unity4 Acquisition\",\"Lottery Income - UN4 Sign Up\",\r",
+						"\"Lottery Income - Tower Sign Up\")) ~> derivedCampaign",
+						"RowNumber, derivedCampaign join({Membership ID} == {Player ID},",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinPaymentsToIntegrationColumns",
+						"joinPaymentsToIntegrationColumns derive(PaymentMethod = case (SterlingLotteryPaymentsInBlobStorage@{Payment Method}==\"Cash\",\"Cash\",\r",
+						"SterlingLotteryPaymentsInBlobStorage@{Payment Method}==\"Cheque\",\"Cheque\",\r",
+						"SterlingLotteryPaymentsInBlobStorage@{Payment Method}==\"Direct Debit\",\"Direct Debit via Sterling\",\r",
+						"SterlingLotteryPaymentsInBlobStorage@{Payment Method}==\"Standing Order\",\"Standing Order via Sterling\",\r",
+						"$DonorfyDefaultPaymentMethod),",
+						"          BankAccount = $DonorfyBankAccount,",
+						"          Fund = $DonorfyFund,",
+						"          DateOfTransaction = case(isDate({Payment Date},'dd/MM/yyyy'),toDate({Payment Date},'dd/MM/yyyy'),currentDate()),",
+						"          Department = $DonorfyDepartment) ~> derivedTransactionColumns",
+						"derivedColumnConstant window(asc(ConstantOne, true),",
+						"     RowNumber = rowNumber()) ~> RowNumber",
+						"SterlingLotteryPaymentsInBlobStorage derive(ConstantOne = 1) ~> derivedColumnConstant",
+						"derivedTransactionColumns filter(toDecimal({Total Payment Amount}) > toDecimal({Lottery Payment Amount})) ~> filterDonationAmount",
+						"derivedTransactionColumns derive(Product = $DonorfyLotteryProduct,",
+						"          Amount = {Lottery Payment Amount}) ~> derivedTransactionLotteryColumns",
+						"filterDonationAmount derive(AllocationProduct = $DonorfyDonationProduct,",
+						"          AllocationAmount = toDecimal({Total Payment Amount}) - toDecimal({Lottery Payment Amount})) ~> derivedTransactionDonationColumns",
+						"SterlingLotteryInBlobStorage derive(TenantCode = $DonorfyTenantCode,",
+						"          IntegrationName = $IntegrationName,",
+						"          ADFPipelineName = $ADFPipelineName,",
+						"          ADFPipelineRunId = $ADFPipelineRunId,",
+						"          IntegrationSourceConstituentKey = concat($DonorfyKeyPrefix,{Player ID}),",
+						"          ProcessedRecord = 0) ~> derivedIntegrationColumns",
+						"derivedConstituentColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          ConstituentsImportId as integer,",
+						"          TenantCode as string,",
+						"          IntegrationName as string,",
+						"          ADFPipelineName as string,",
+						"          ADFPipelineRunId as string,",
+						"          IntegrationSourceConstituentKey as string,",
+						"          ProcessedRecord as boolean,",
+						"          IsActive as boolean,",
+						"          ArchiveReason as string,",
+						"          ArchiveDate as date,",
+						"          ExternalKey as string,",
+						"          Title as string,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          Suffix as string,",
+						"          Formerly as string,",
+						"          HouseBuildingNumber as string,",
+						"          Address1 as string,",
+						"          Address2 as string,",
+						"          Town as string,",
+						"          County as string,",
+						"          Postcode as string,",
+						"          Country as string,",
+						"          Area as string,",
+						"          PhoneNumber as string,",
+						"          OtherPhoneNumber as string,",
+						"          MobilePhoneNumber as string,",
+						"          NationalIDNumber as string,",
+						"          EmailAddress1 as string,",
+						"          EmailAddress2 as string,",
+						"          LabelName as string,",
+						"          Salutation as string,",
+						"          Work_HouseBuildingNumber as string,",
+						"          Work_Address1 as string,",
+						"          Work_Address2 as string,",
+						"          Work_Town as string,",
+						"          Work_County as string,",
+						"          Work_Postcode as string,",
+						"          Work_Country as string,",
+						"          Work_Area as string,",
+						"          Work_PhoneNumber as string,",
+						"          Work_OtherPhoneNumber as string,",
+						"          Work_MobilePhoneNumber as string,",
+						"          Work_EmailAddress1 as string,",
+						"          Work_EmailAddress2 as string,",
+						"          Work_LabelName as string,",
+						"          Work_Salutation as string,",
+						"          WebSite as string,",
+						"          RecruitmentCampaign as string,",
+						"          DateOfBirth as date,",
+						"          YearOfBirth as integer,",
+						"          OrganisationName as string,",
+						"          JobTitle as string,",
+						"          Department as string,",
+						"          Gender as string,",
+						"          ConstituentType as string,",
+						"          Comments as string,",
+						"          OKToMail as boolean,",
+						"          OKToPhone as boolean,",
+						"          OKToSMS as boolean,",
+						"          OKToEmail as boolean,",
+						"          AllowNameSwap as boolean,",
+						"          HasGAD as boolean,",
+						"          GiftAidNumber as integer,",
+						"          GADDecDate as date,",
+						"          DeclarationMethod as string,",
+						"          GADStartDate as date,",
+						"          GADEndDate as date,",
+						"          GADCancelled as boolean,",
+						"          GADCancelDate as date,",
+						"          TaxPayerTitle as string,",
+						"          TaxPayerFirstName as string,",
+						"          TaxPayerLastName as string,",
+						"          RefusedGAD as boolean,",
+						"          IncludeRow as boolean,",
+						"          IsGroupConstituent as boolean,",
+						"          FK_TenantId as string,",
+						"          ConstituentId as string,",
+						"          GiftAidDecId as string,",
+						"          TagId as string,",
+						"          IsGroup as boolean,",
+						"          PersonalContactDetailsId as string,",
+						"          WorkContactDetailsId as string,",
+						"          OtherContactDetailsId as string,",
+						"          FK_ConstituentTypeId as string,",
+						"          FK_RecruitmentCampaign as string,",
+						"          FK_CountryId as string,",
+						"          FK_ArchiveReasonId as string,",
+						"          FK_DeclarationMethod as string,",
+						"          FK_WorkCountryId as string,",
+						"          MainContactConstituentId as string,",
+						"          MainContactPersonalContactDetailsId as string,",
+						"          MainContactWorkContactDetailsId as string,",
+						"          MainContactOtherContactDetailsId as string,",
+						"          MainContactFK_ConstituentTypeId as string,",
+						"          ConstituentNumber as long,",
+						"          FK_Area_Id as string,",
+						"          FK_Work_Area_Id as string,",
+						"          MatchScore as integer,",
+						"          HowIntegrated as string,",
+						"          FileName as string,",
+						"          DateAdded as timestamp,",
+						"          ErrorMessage as string,",
+						"          OriginalConstituentsImportId as integer,",
+						"          RetryAttempts as integer,",
+						"          OrderNumber as integer,",
+						"          SuccessfullyReprocessed as boolean,",
+						"          MatchAttempted as boolean,",
+						"          OrderId as long,",
+						"          Operation as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          TenantCode,",
+						"          IntegrationName,",
+						"          ADFPipelineName,",
+						"          ADFPipelineRunId,",
+						"          IntegrationSourceConstituentKey,",
+						"          ProcessedRecord,",
+						"          Title,",
+						"          FirstName,",
+						"          LastName = Surname,",
+						"          HouseBuildingNumber = {Address 1},",
+						"          Address1 = {Address 2},",
+						"          Address2 = {Address 3},",
+						"          Town = {Town / City},",
+						"          County,",
+						"          Postcode,",
+						"          EmailAddress1 = {E-mail},",
+						"          MobilePhoneNumber = Mobile,",
+						"          IsActive,",
+						"          ArchiveReason,",
+						"          OKToEmail = OkToEmail,",
+						"          OKToMail = OkToMail,",
+						"          OKToPhone,",
+						"          OKToSMS,",
+						"          RecruitmentCampaign = Campaign,",
+						"          DateOfBirth = DateOfBirthDateType,",
+						"          ConstituentType,",
+						"          FileName,",
+						"          DateAdded",
+						"     )) ~> DonorfyConstituentImportStagingTable",
+						"derivedTransactionLotteryColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          TransactionsImportId as integer,",
+						"          TenantCode as string,",
+						"          IntegrationName as string,",
+						"          ADFPipelineName as string,",
+						"          ADFPipelineRunId as string,",
+						"          IntegrationSourceConstituentKey as string,",
+						"          ProcessedRecord as boolean,",
+						"          TransactionNumber1 as integer,",
+						"          TransactionNumber2 as integer,",
+						"          ExternalKey as string,",
+						"          GiftAidFlag as string,",
+						"          Campaign as string,",
+						"          DateOfTransaction as date,",
+						"          Amount as decimal(19,4),",
+						"          Product as string,",
+						"          PaymentMethod as string,",
+						"          BankAccount as string,",
+						"          Fund as string,",
+						"          Currency as string,",
+						"          Reference as string,",
+						"          Comments as string,",
+						"          SegmentCode as string,",
+						"          Channel as string,",
+						"          ConnectedConstituentExternalKey as string,",
+						"          BeneficiaryConstituentExternalKey as string,",
+						"          ConstituentId as string,",
+						"          TransactionId1 as string,",
+						"          TransactionId2 as string,",
+						"          FK_PaymentMethod as string,",
+						"          FK_BankAccount as string,",
+						"          FK_Product as string,",
+						"          FK_Fund as string,",
+						"          FK_Currency as string,",
+						"          FK_Campaign as string,",
+						"          FK_TenantId as string,",
+						"          FK_ChannelId as string,",
+						"          ConnectedConstituentConstituentId as string,",
+						"          BeneficiaryConstituentConstituentId as string,",
+						"          Quantity as decimal(9,2),",
+						"          FileName as string,",
+						"          ProcessingCostsAmount as decimal(19,4),",
+						"          ErrorMessage as string,",
+						"          Department as string,",
+						"          PayoutReference as string,",
+						"          IntegrationSourceTransactionKey as string,",
+						"          CanRecoverTax as boolean",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          TenantCode,",
+						"          IntegrationName,",
+						"          ADFPipelineName,",
+						"          ADFPipelineRunId,",
+						"          IntegrationSourceConstituentKey,",
+						"          ProcessedRecord,",
+						"          Amount,",
+						"          Product,",
+						"          PaymentMethod,",
+						"          Fund,",
+						"          Campaign,",
+						"          BankAccount,",
+						"          Department,",
+						"          FileName,",
+						"          DateOfTransaction,",
+						"          IntegrationSourceTransactionKey = RowNumber",
+						"     )) ~> DonorfyTransactionsImportStagingTable",
+						"derivedTransactionDonationColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          TransactionAllocationsImportId as integer,",
+						"          TenantCode as string,",
+						"          IntegrationName as string,",
+						"          ADFPipelineName as string,",
+						"          ADFPipelineRunId as string,",
+						"          IntegrationSourceConstituentKey as string,",
+						"          ProcessedRecord as boolean,",
+						"          FK_TransactionsImportId as integer,",
+						"          Amount as decimal(19,4),",
+						"          Product as string,",
+						"          Quantity as decimal(9,2),",
+						"          Fund as string,",
+						"          Department as string,",
+						"          AllocationDate as date,",
+						"          GiftAidFlag as string,",
+						"          Comments as string,",
+						"          BeneficiaryConstituentExternalKey as string,",
+						"          BeneficiaryConstituentConstituentId as string,",
+						"          ExternalKey as string,",
+						"          FK_Product as string,",
+						"          FK_Fund as string,",
+						"          FK_DepartmentId as string,",
+						"          FK_Currency as string,",
+						"          FK_TenantId as string,",
+						"          IntegrationSourceTransactionKey as string,",
+						"          CanRecoverTax as boolean",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          TenantCode,",
+						"          IntegrationName,",
+						"          ADFPipelineName,",
+						"          ADFPipelineRunId,",
+						"          IntegrationSourceConstituentKey,",
+						"          ProcessedRecord,",
+						"          Amount = AllocationAmount,",
+						"          Product = AllocationProduct,",
+						"          Fund,",
+						"          Department,",
+						"          AllocationDate = DateOfTransaction,",
+						"          IntegrationSourceTransactionKey = RowNumber",
+						"     )) ~> DonorfyTransactionAdditionalAllocationssImportStagingTable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SterlingLotteryCSVBlobStorageMembers')]",
+				"[concat(variables('factoryId'), '/datasets/SterlingLotteryCSVBlobStoragePayments')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSQLImportConstituents')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSQLImportTransactions')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSQLImportTransactionsAdditionalAllocations')]"
 			]
 		}
 	]
