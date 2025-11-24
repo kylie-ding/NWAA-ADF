@@ -15420,8 +15420,7 @@
 									"DonorfyConstituentImportStagingTable": {},
 									"DonorfyTransactionsImportStagingTable": {},
 									"DonorfyTransactionAdditionalAllocationssImportStagingTable": {}
-								},
-								"linkedServiceParameters": {}
+								}
 							},
 							"staging": {},
 							"compute": {
