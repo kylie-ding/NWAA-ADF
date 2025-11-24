@@ -283,13 +283,13 @@
 			"ErrorAlertDestinationWebhooks": {
 				"type": "Array",
 				"defaultValue": [
-					"https://prod-183.westeurope.logic.azure.com:443/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VQcZgnZyLTJmB867uruebwIH6DcGzw3k0tagj6PAzo"
+					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=78_UtTs6uUpZ2jgZPTVV0_Tfhx5dBxkY6qLRnTknnM4"
 				]
 			},
 			"AlertDestinationWebhooks": {
 				"type": "Array",
 				"defaultValue": [
-					"https://prod-183.westeurope.logic.azure.com:443/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9VQcZgnZyLTJmB867uruebwIH6DcGzw3k0tagj6PAzo"
+					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=78_UtTs6uUpZ2jgZPTVV0_Tfhx5dBxkY6qLRnTknnM4"
 				]
 			},
 			"Subscription": {
