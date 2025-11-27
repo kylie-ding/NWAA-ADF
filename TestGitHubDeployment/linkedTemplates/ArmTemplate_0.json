@@ -1,0 +1,3125 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "TestGitHubDeployment"
+		},
+		"DonorfyIngegrationAzureFunction_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'DonorfyIngegrationAzureFunction'"
+		},
+		"IntegrationWorkingFilesAzureBlobStorage_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'IntegrationWorkingFilesAzureBlobStorage'"
+		},
+		"NWAAAzureSqlDatabase_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'NWAAAzureSqlDatabase'"
+		},
+		"DonorfyIngegrationAzureFunction_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://nwaadonorfyintegrationhubfunctions.azurewebsites.net"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SendAlertToTeamsChannel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEachWebhookDestinationURL",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.teamWebhookUrls",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Set JSON schema",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "messageBodyJSON",
+										"value": {
+											"value": "{\n  \"subscription\": \"@{pipeline().parameters.subscription}\",\n  \"resourceGroup\":  \"@{pipeline().parameters.resourceGroup}\",\n  \"DataFactory\":  \"@{pipeline().DataFactory}\",\n  \"runId\": \"@{pipeline().parameters.runId}\",\n  \"name\": \"@{pipeline().parameters.name}\",\n  \"status\": \"@{pipeline().parameters.status}\",\n  \"triggerTime\": \"@{pipeline().parameters.triggerTime}\",\n  \"executionEndTime\": \"@{pipeline().parameters.executionEndTime}\",\n  \"runDuration\":  \"@{pipeline().parameters.runDuration}\",\n  \"message\":  \"@{pipeline().parameters.message}\",\n  \"runLink\": \"@{concat('https://adf.azure.com/en/monitoring/pipelineruns/',pipeline().parameters.runId,'?factory=/subscriptions/',pipeline().parameters.subscription,'/resourceGroups/',pipeline().parameters.resourceGroup,'/providers/Microsoft.DataFactory/factories/',pipeline().DataFactory)}\"\n}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Invoke Teams Webhook Url",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Set JSON schema",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"url": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@variables('messageBodyJSON')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set JSON schema generic message",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Invoke Teams Webhook Url",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "messageCard",
+										"value": {
+											"value": "{\n  \"subscription\": \"@{pipeline().parameters.subscription}\",\n  \"resourceGroup\":  \"@{pipeline().parameters.resourceGroup}\",\n  \"DataFactory\":  \"@{pipeline().DataFactory}\",\n  \"runId\": \"@{pipeline().parameters.runId}\",\n  \"name\": \"@{pipeline().parameters.name}\",\n  \"status\": \"@{pipeline().parameters.status}\",\n  \"triggerTime\": \"@{pipeline().parameters.triggerTime}\",\n  \"executionEndTime\": \"@{pipeline().parameters.executionEndTime}\",\n  \"runDuration\":  \"@{pipeline().parameters.runDuration}\",\n  \"message\":  \"@{variables('genericErrorMessage')}\",\n  \"runLink\": \"@{concat('https://adf.azure.com/en/monitoring/pipelineruns/',pipeline().parameters.runId,'?factory=/subscriptions/',pipeline().parameters.subscription,'/resourceGroups/',pipeline().parameters.resourceGroup,'/providers/Microsoft.DataFactory/factories/',pipeline().DataFactory)}\"\n}\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Invoke Teams Webhook Url_copy1",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Set JSON schema generic message",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"url": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@json(variables('messageCard'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"subscription": {
+						"type": "string",
+						"defaultValue": "f92b78e2-ea05-4117-880b-1c4ba8755802"
+					},
+					"resourceGroup": {
+						"type": "string",
+						"defaultValue": "Donorfy"
+					},
+					"runId": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"triggerTime": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string",
+						"defaultValue": "This is a test message"
+					},
+					"executionEndTime": {
+						"type": "string"
+					},
+					"runDuration": {
+						"type": "string"
+					},
+					"teamWebhookUrls": {
+						"type": "array",
+						"defaultValue": [
+							"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=78_UtTs6uUpZ2jgZPTVV0_Tfhx5dBxkY6qLRnTknnM4"
+						]
+					}
+				},
+				"variables": {
+					"messageCard": {
+						"type": "String"
+					},
+					"genericErrorMessage": {
+						"type": "String",
+						"defaultValue": "An error has occured running a pipeline.  There was a problem sending the error message. Please look at the pipeline run log for the error details."
+					},
+					"messageBodyJSON": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-06-10T10:43:40Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DonorfyIngegrationAzureFunction')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFunction",
+				"typeProperties": {
+					"functionAppUrl": "[parameters('DonorfyIngegrationAzureFunction_properties_typeProperties_functionAppUrl')]",
+					"authentication": "Anonymous",
+					"functionKey": {
+						"type": "SecureString",
+						"value": "[parameters('DonorfyIngegrationAzureFunction_functionKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IntegrationWorkingFilesAzureBlobStorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('IntegrationWorkingFilesAzureBlobStorage_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/NWAAAzureSqlDatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('NWAAAzureSqlDatabase_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportActivities')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ActivitiesImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LinkedConstituentExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ActivityNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Campaign",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateOfActivity",
+						"type": "date"
+					},
+					{
+						"name": "ActivityType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Comments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ShowAlert",
+						"type": "bit"
+					},
+					{
+						"name": "SegmentCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SegmentName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ActivityId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Campaign",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_ActivityType",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "Code1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Date1",
+						"type": "date"
+					},
+					{
+						"name": "Date2",
+						"type": "date"
+					},
+					{
+						"name": "Date3",
+						"type": "date"
+					},
+					{
+						"name": "Date4",
+						"type": "date"
+					},
+					{
+						"name": "Date5",
+						"type": "date"
+					},
+					{
+						"name": "Date6",
+						"type": "date"
+					},
+					{
+						"name": "Date7",
+						"type": "date"
+					},
+					{
+						"name": "Date8",
+						"type": "date"
+					},
+					{
+						"name": "Date9",
+						"type": "date"
+					},
+					{
+						"name": "Date10",
+						"type": "date"
+					},
+					{
+						"name": "Number1",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number2",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number3",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number4",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number5",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number6",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number7",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number8",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number9",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number10",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "YesNo1",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo2",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo3",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo4",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo5",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo6",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo7",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo8",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo9",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo10",
+						"type": "bit"
+					},
+					{
+						"name": "LinkUrl",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FileName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_Activities"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportConstituents')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ConstituentsImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "IsActive",
+						"type": "bit"
+					},
+					{
+						"name": "ArchiveReason",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ArchiveDate",
+						"type": "date"
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Title",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FirstName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LastName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Suffix",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Formerly",
+						"type": "nvarchar"
+					},
+					{
+						"name": "HouseBuildingNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Address1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Address2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Town",
+						"type": "nvarchar"
+					},
+					{
+						"name": "County",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Postcode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Country",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Area",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "OtherPhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MobilePhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "NationalIDNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmailAddress1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmailAddress2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LabelName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Salutation",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_HouseBuildingNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Address1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Address2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Town",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_County",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Postcode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Country",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Area",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_PhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_OtherPhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_MobilePhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_EmailAddress1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_EmailAddress2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_LabelName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work_Salutation",
+						"type": "nvarchar"
+					},
+					{
+						"name": "WebSite",
+						"type": "nvarchar"
+					},
+					{
+						"name": "RecruitmentCampaign",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateOfBirth",
+						"type": "date"
+					},
+					{
+						"name": "YearOfBirth",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "OrganisationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "JobTitle",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Department",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Gender",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConstituentType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Comments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "OKToMail",
+						"type": "bit"
+					},
+					{
+						"name": "OKToPhone",
+						"type": "bit"
+					},
+					{
+						"name": "OKToSMS",
+						"type": "bit"
+					},
+					{
+						"name": "OKToEmail",
+						"type": "bit"
+					},
+					{
+						"name": "AllowNameSwap",
+						"type": "bit"
+					},
+					{
+						"name": "HasGAD",
+						"type": "bit"
+					},
+					{
+						"name": "GiftAidNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "GADDecDate",
+						"type": "date"
+					},
+					{
+						"name": "DeclarationMethod",
+						"type": "nvarchar"
+					},
+					{
+						"name": "GADStartDate",
+						"type": "date"
+					},
+					{
+						"name": "GADEndDate",
+						"type": "date"
+					},
+					{
+						"name": "GADCancelled",
+						"type": "bit"
+					},
+					{
+						"name": "GADCancelDate",
+						"type": "date"
+					},
+					{
+						"name": "TaxPayerTitle",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TaxPayerFirstName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TaxPayerLastName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "RefusedGAD",
+						"type": "bit"
+					},
+					{
+						"name": "IncludeRow",
+						"type": "bit"
+					},
+					{
+						"name": "IsGroupConstituent",
+						"type": "bit"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "GiftAidDecId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "TagId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IsGroup",
+						"type": "bit"
+					},
+					{
+						"name": "PersonalContactDetailsId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "WorkContactDetailsId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "OtherContactDetailsId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_ConstituentTypeId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_RecruitmentCampaign",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_CountryId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_ArchiveReasonId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_DeclarationMethod",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_WorkCountryId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "MainContactConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "MainContactPersonalContactDetailsId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "MainContactWorkContactDetailsId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "MainContactOtherContactDetailsId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "MainContactFK_ConstituentTypeId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ConstituentNumber",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "FK_Area_Id",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Work_Area_Id",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "MatchScore",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "HowIntegrated",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FileName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateAdded",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "nvarchar"
+					},
+					{
+						"name": "OriginalConstituentsImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "RetryAttempts",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "OrderNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SuccessfullyReprocessed",
+						"type": "bit"
+					},
+					{
+						"name": "MatchAttempted",
+						"type": "bit"
+					},
+					{
+						"name": "OrderId",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Operation",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_Constituents"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportGADs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "GADImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "DeclarationMethod",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "Campaign",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeclarationDate",
+						"type": "date"
+					},
+					{
+						"name": "DeclarationStartDate",
+						"type": "date"
+					},
+					{
+						"name": "DeclarationEndDate",
+						"type": "date"
+					},
+					{
+						"name": "GADCancelled",
+						"type": "bit"
+					},
+					{
+						"name": "GADCancelDate",
+						"type": "date"
+					},
+					{
+						"name": "GADDeclarationId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "TaxPayerTitle",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TaxPayerFirstName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TaxPayerLastName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConfirmationRequired",
+						"type": "bit"
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Operation",
+						"type": "varchar"
+					},
+					{
+						"name": "SourceSystemInfo",
+						"type": "xml"
+					},
+					{
+						"name": "ConfirmedDate",
+						"type": "date"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_GiftAidDeclarations"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportPurposes')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PurposesImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Purpose",
+						"type": "nvarchar"
+					},
+					{
+						"name": "OptIn",
+						"type": "bit"
+					},
+					{
+						"name": "OptOut",
+						"type": "bit"
+					},
+					{
+						"name": "Unknown",
+						"type": "bit"
+					},
+					{
+						"name": "DateReceived",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "CommsPrefId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_PreferenceType",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ContactChannelDetails",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Confirmed",
+						"type": "bit"
+					},
+					{
+						"name": "Allowed",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_Purposes"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportTags')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "TagsImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateTagged",
+						"type": "date"
+					},
+					{
+						"name": "TagIsActive",
+						"type": "bit"
+					},
+					{
+						"name": "TagCategory",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TagName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TagStartDate",
+						"type": "date"
+					},
+					{
+						"name": "TagEndDate",
+						"type": "date"
+					},
+					{
+						"name": "Comments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Date1",
+						"type": "date"
+					},
+					{
+						"name": "Date2",
+						"type": "date"
+					},
+					{
+						"name": "Date3",
+						"type": "date"
+					},
+					{
+						"name": "Date4",
+						"type": "date"
+					},
+					{
+						"name": "Date5",
+						"type": "date"
+					},
+					{
+						"name": "Date6",
+						"type": "date"
+					},
+					{
+						"name": "Date7",
+						"type": "date"
+					},
+					{
+						"name": "Date8",
+						"type": "date"
+					},
+					{
+						"name": "Date9",
+						"type": "date"
+					},
+					{
+						"name": "Date10",
+						"type": "date"
+					},
+					{
+						"name": "Number1",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number2",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number3",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number4",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number5",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number6",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number7",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number8",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number9",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number10",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "YesNo1",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo2",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo3",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo4",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo5",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo6",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo7",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo8",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo9",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo10",
+						"type": "bit"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TagCategoryLookUpTypeRefId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TagLookUpRefId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Operation",
+						"type": "varchar"
+					},
+					{
+						"name": "SourceSystemInfo",
+						"type": "xml"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_Tags"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportTransactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "TransactionsImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "TransactionNumber1",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TransactionNumber2",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "GiftAidFlag",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Campaign",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateOfTransaction",
+						"type": "date"
+					},
+					{
+						"name": "Amount",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "Product",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PaymentMethod",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccount",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Fund",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Currency",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Reference",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Comments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SegmentCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Channel",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConnectedConstituentExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BeneficiaryConstituentExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "TransactionId1",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "TransactionId2",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_PaymentMethod",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_BankAccount",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Product",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Fund",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Currency",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Campaign",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_ChannelId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ConnectedConstituentConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "BeneficiaryConstituentConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "Quantity",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "FileName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessingCostsAmount",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Department",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PayoutReference",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationSourceTransactionKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CanRecoverTax",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_Transactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLImportTransactionsAdditionalAllocations')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "TransactionAllocationsImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "FK_TransactionsImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Amount",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "Product",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Quantity",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Fund",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Department",
+						"type": "nvarchar"
+					},
+					{
+						"name": "AllocationDate",
+						"type": "date"
+					},
+					{
+						"name": "GiftAidFlag",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Comments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BeneficiaryConstituentExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BeneficiaryConstituentConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FK_Product",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Fund",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_DepartmentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Currency",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceTransactionKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CanRecoverTax",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "Import_Transaction_Additional_Allocations"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLIntegrationImportSettings')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "integration",
+					"table": "IntegrationImportSettings"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSQLStoredProcCall')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "NWAAAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ActivitiesImportId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TenantCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "bit"
+					},
+					{
+						"name": "ExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LinkedConstituentExternalKey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ActivityNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Campaign",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateOfActivity",
+						"type": "date"
+					},
+					{
+						"name": "ActivityType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Comments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ShowAlert",
+						"type": "bit"
+					},
+					{
+						"name": "SegmentCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SegmentName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ActivityId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_Campaign",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_ActivityType",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "FK_TenantId",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "Code1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Code10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Date1",
+						"type": "date"
+					},
+					{
+						"name": "Date2",
+						"type": "date"
+					},
+					{
+						"name": "Date3",
+						"type": "date"
+					},
+					{
+						"name": "Date4",
+						"type": "date"
+					},
+					{
+						"name": "Date5",
+						"type": "date"
+					},
+					{
+						"name": "Date6",
+						"type": "date"
+					},
+					{
+						"name": "Date7",
+						"type": "date"
+					},
+					{
+						"name": "Date8",
+						"type": "date"
+					},
+					{
+						"name": "Date9",
+						"type": "date"
+					},
+					{
+						"name": "Date10",
+						"type": "date"
+					},
+					{
+						"name": "Number1",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number2",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number3",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number4",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number5",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number6",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number7",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number8",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number9",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "Number10",
+						"type": "decimal",
+						"precision": 9,
+						"scale": 2
+					},
+					{
+						"name": "YesNo1",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo2",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo3",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo4",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo5",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo6",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo7",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo8",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo9",
+						"type": "bit"
+					},
+					{
+						"name": "YesNo10",
+						"type": "bit"
+					},
+					{
+						"name": "LinkUrl",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FileName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/NWAAAzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStorageActivityLogFile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@concat('Activity Log File ', utcNow('yyyyMMdd hhm'),'.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "Log Files",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "MembershipID",
+						"type": "String"
+					},
+					{
+						"name": "LotteryNum",
+						"type": "String"
+					},
+					{
+						"name": "FullName",
+						"type": "String"
+					},
+					{
+						"name": "Address1",
+						"type": "String"
+					},
+					{
+						"name": "Address2",
+						"type": "String"
+					},
+					{
+						"name": "Address3",
+						"type": "String"
+					},
+					{
+						"name": "Town",
+						"type": "String"
+					},
+					{
+						"name": "Postcode",
+						"type": "String"
+					},
+					{
+						"name": "Phone Number",
+						"type": "String"
+					},
+					{
+						"name": "Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "Alternative Email",
+						"type": "String"
+					},
+					{
+						"name": "Payment Method",
+						"type": "String"
+					},
+					{
+						"name": "PrizeValue",
+						"type": "String"
+					},
+					{
+						"name": "Cheque No",
+						"type": "String"
+					},
+					{
+						"name": "Publicity",
+						"type": "String"
+					},
+					{
+						"name": "Supported Charity",
+						"type": "String"
+					},
+					{
+						"name": "Rollover Prize",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStorageConstituentLogFile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@concat('Constituent Log File ', utcNow('yyyyMMdd hhm'),'.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "Log Files",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "MembershipID",
+						"type": "String"
+					},
+					{
+						"name": "LotteryNum",
+						"type": "String"
+					},
+					{
+						"name": "FullName",
+						"type": "String"
+					},
+					{
+						"name": "Address1",
+						"type": "String"
+					},
+					{
+						"name": "Address2",
+						"type": "String"
+					},
+					{
+						"name": "Address3",
+						"type": "String"
+					},
+					{
+						"name": "Town",
+						"type": "String"
+					},
+					{
+						"name": "Postcode",
+						"type": "String"
+					},
+					{
+						"name": "Phone Number",
+						"type": "String"
+					},
+					{
+						"name": "Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "Alternative Email",
+						"type": "String"
+					},
+					{
+						"name": "Payment Method",
+						"type": "String"
+					},
+					{
+						"name": "PrizeValue",
+						"type": "String"
+					},
+					{
+						"name": "Cheque No",
+						"type": "String"
+					},
+					{
+						"name": "Publicity",
+						"type": "String"
+					},
+					{
+						"name": "Supported Charity",
+						"type": "String"
+					},
+					{
+						"name": "Rollover Prize",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStorageContainer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "Input Files",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "MembershipID",
+						"type": "String"
+					},
+					{
+						"name": "LotteryNum",
+						"type": "String"
+					},
+					{
+						"name": "FullName",
+						"type": "String"
+					},
+					{
+						"name": "Address1",
+						"type": "String"
+					},
+					{
+						"name": "Address2",
+						"type": "String"
+					},
+					{
+						"name": "Address3",
+						"type": "String"
+					},
+					{
+						"name": "Town",
+						"type": "String"
+					},
+					{
+						"name": "Postcode",
+						"type": "String"
+					},
+					{
+						"name": "Phone Number",
+						"type": "String"
+					},
+					{
+						"name": "Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "Alternative Email",
+						"type": "String"
+					},
+					{
+						"name": "Payment Method",
+						"type": "String"
+					},
+					{
+						"name": "PrizeValue",
+						"type": "String"
+					},
+					{
+						"name": "Cheque No",
+						"type": "String"
+					},
+					{
+						"name": "Publicity",
+						"type": "String"
+					},
+					{
+						"name": "Supported Charity",
+						"type": "String"
+					},
+					{
+						"name": "Rollover Prize",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStorageGAD')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "membershipID",
+						"type": "String"
+					},
+					{
+						"name": "clientMemberID",
+						"type": "String"
+					},
+					{
+						"name": "title",
+						"type": "String"
+					},
+					{
+						"name": "firstname",
+						"type": "String"
+					},
+					{
+						"name": "surname",
+						"type": "String"
+					},
+					{
+						"name": "address1",
+						"type": "String"
+					},
+					{
+						"name": "address2",
+						"type": "String"
+					},
+					{
+						"name": "address3",
+						"type": "String"
+					},
+					{
+						"name": "town",
+						"type": "String"
+					},
+					{
+						"name": "county",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "postcode",
+						"type": "String"
+					},
+					{
+						"name": "giftAidDate",
+						"type": "String"
+					},
+					{
+						"name": "hasDonationAccount",
+						"type": "String"
+					},
+					{
+						"name": "donationAccountType",
+						"type": "String"
+					},
+					{
+						"name": "donationSource",
+						"type": "String"
+					},
+					{
+						"name": "donationTotal",
+						"type": "String"
+					},
+					{
+						"name": "donationBalance",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStorageGADLogFile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@concat('GAD Log File ', utcNow('yyyyMMdd hhm'),'.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "Log Files",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "GADImportId",
+						"type": "String"
+					},
+					{
+						"name": "TenantCode",
+						"type": "String"
+					},
+					{
+						"name": "IntegrationName",
+						"type": "String"
+					},
+					{
+						"name": "ADFPipelineName",
+						"type": "String"
+					},
+					{
+						"name": "ADFPipelineRunId",
+						"type": "String"
+					},
+					{
+						"name": "IntegrationSourceConstituentKey",
+						"type": "String"
+					},
+					{
+						"name": "ProcessedRecord",
+						"type": "String"
+					},
+					{
+						"name": "DeclarationMethod",
+						"type": "String"
+					},
+					{
+						"name": "ConstituentId",
+						"type": "String"
+					},
+					{
+						"name": "Campaign",
+						"type": "String"
+					},
+					{
+						"name": "DeclarationDate",
+						"type": "String"
+					},
+					{
+						"name": "DeclarationStartDate",
+						"type": "String"
+					},
+					{
+						"name": "DeclarationEndDate",
+						"type": "String"
+					},
+					{
+						"name": "GADCancelled",
+						"type": "String"
+					},
+					{
+						"name": "GADCancelDate",
+						"type": "String"
+					},
+					{
+						"name": "GADDeclarationId",
+						"type": "String"
+					},
+					{
+						"name": "TaxPayerTitle",
+						"type": "String"
+					},
+					{
+						"name": "TaxPayerFirstName",
+						"type": "String"
+					},
+					{
+						"name": "TaxPayerLastName",
+						"type": "String"
+					},
+					{
+						"name": "ConfirmationRequired",
+						"type": "String"
+					},
+					{
+						"name": "ErrorMessage",
+						"type": "String"
+					},
+					{
+						"name": "Operation",
+						"type": "String"
+					},
+					{
+						"name": "SourceSystemInfo",
+						"type": "String"
+					},
+					{
+						"name": "ConfirmedDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStorageMembers')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Player ID",
+						"type": "String"
+					},
+					{
+						"name": "Client Member ID",
+						"type": "String"
+					},
+					{
+						"name": "Title",
+						"type": "String"
+					},
+					{
+						"name": "FirstName",
+						"type": "String"
+					},
+					{
+						"name": "Surname",
+						"type": "String"
+					},
+					{
+						"name": "Address 1",
+						"type": "String"
+					},
+					{
+						"name": "Address 2",
+						"type": "String"
+					},
+					{
+						"name": "Address 3",
+						"type": "String"
+					},
+					{
+						"name": "Address 4",
+						"type": "String"
+					},
+					{
+						"name": "Town / City",
+						"type": "String"
+					},
+					{
+						"name": "County",
+						"type": "String"
+					},
+					{
+						"name": "Postcode",
+						"type": "String"
+					},
+					{
+						"name": "Phone",
+						"type": "String"
+					},
+					{
+						"name": "E-mail",
+						"type": "String"
+					},
+					{
+						"name": "Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Date of Birth",
+						"type": "String"
+					},
+					{
+						"name": "Created Date",
+						"type": "String"
+					},
+					{
+						"name": "Member Status",
+						"type": "String"
+					},
+					{
+						"name": "Cancelled Date",
+						"type": "String"
+					},
+					{
+						"name": "Cancelled Reason",
+						"type": "String"
+					},
+					{
+						"name": "Number of Numbers",
+						"type": "String"
+					},
+					{
+						"name": "Active Numbers",
+						"type": "String"
+					},
+					{
+						"name": "Inactive Numbers",
+						"type": "String"
+					},
+					{
+						"name": "Earliest Draw",
+						"type": "String"
+					},
+					{
+						"name": "Current Balance",
+						"type": "String"
+					},
+					{
+						"name": "Total Payments",
+						"type": "String"
+					},
+					{
+						"name": "Total Payments Amount",
+						"type": "String"
+					},
+					{
+						"name": "Total Winnings",
+						"type": "String"
+					},
+					{
+						"name": "Draws Dormant",
+						"type": "String"
+					},
+					{
+						"name": "SourceCode",
+						"type": "String"
+					},
+					{
+						"name": "Payment Frequency",
+						"type": "String"
+					},
+					{
+						"name": "Payment Method",
+						"type": "String"
+					},
+					{
+						"name": "Cash Round Reference",
+						"type": "String"
+					},
+					{
+						"name": "Payroll Round Reference",
+						"type": "String"
+					},
+					{
+						"name": "Bank Account",
+						"type": "String"
+					},
+					{
+						"name": "Modulus Check",
+						"type": "String"
+					},
+					{
+						"name": "Payment Status",
+						"type": "String"
+					},
+					{
+						"name": "Canvasser",
+						"type": "String"
+					},
+					{
+						"name": "Supported Charity",
+						"type": "String"
+					},
+					{
+						"name": "Lottery Mail",
+						"type": "String"
+					},
+					{
+						"name": "Publicity",
+						"type": "String"
+					},
+					{
+						"name": "Un-contactable (Gone Away)",
+						"type": "String"
+					},
+					{
+						"name": "No Cancellation Mail",
+						"type": "String"
+					},
+					{
+						"name": "Donor Number",
+						"type": "String"
+					},
+					{
+						"name": "Last Modified",
+						"type": "String"
+					},
+					{
+						"name": "Receipt Code",
+						"type": "String"
+					},
+					{
+						"name": "Deceased",
+						"type": "String"
+					},
+					{
+						"name": "Raffle Marketing - All",
+						"type": "String"
+					},
+					{
+						"name": "Organisation Imposed - Email",
+						"type": "String"
+					},
+					{
+						"name": "Direct Communication - Email",
+						"type": "String"
+					},
+					{
+						"name": "Charity Marketing - Email",
+						"type": "String"
+					},
+					{
+						"name": "FPS Registered - Email",
+						"type": "String"
+					},
+					{
+						"name": "TPS Registered - Home Telephone",
+						"type": "String"
+					},
+					{
+						"name": "Organisation Imposed - Home Telephone",
+						"type": "String"
+					},
+					{
+						"name": "Direct Communication - Home Telephone",
+						"type": "String"
+					},
+					{
+						"name": "FPS Registered - Home Telephone",
+						"type": "String"
+					},
+					{
+						"name": "Charity Marketing - Home Telephone",
+						"type": "String"
+					},
+					{
+						"name": "MPS Registered - Letter",
+						"type": "String"
+					},
+					{
+						"name": "FPS Registered - Letter",
+						"type": "String"
+					},
+					{
+						"name": "Direct Communication - Letter",
+						"type": "String"
+					},
+					{
+						"name": "Organisation Imposed - Letter",
+						"type": "String"
+					},
+					{
+						"name": "Charity Marketing - Letter",
+						"type": "String"
+					},
+					{
+						"name": "FPS Registered - Mobile",
+						"type": "String"
+					},
+					{
+						"name": "TPS Registered - Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Direct Communication - Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Charity Marketing - Mobile",
+						"type": "String"
+					},
+					{
+						"name": "Organisation Imposed - Mobile",
+						"type": "String"
+					},
+					{
+						"name": "FPS Registered - SMS",
+						"type": "String"
+					},
+					{
+						"name": "Charity Marketing - SMS",
+						"type": "String"
+					},
+					{
+						"name": "Direct Communication - SMS",
+						"type": "String"
+					},
+					{
+						"name": "Organisation Imposed - SMS",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SterlingLotteryCSVBlobStoragePayments')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IntegrationWorkingFilesAzureBlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "sterling-lottery-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Membership ID",
+						"type": "String"
+					},
+					{
+						"name": "Lottery Number",
+						"type": "String"
+					},
+					{
+						"name": "Payment Method",
+						"type": "String"
+					},
+					{
+						"name": "Lottery Payment Amount",
+						"type": "String"
+					},
+					{
+						"name": "Total Payment Amount",
+						"type": "String"
+					},
+					{
+						"name": "Payment Date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IntegrationWorkingFilesAzureBlobStorage')]"
+			]
+		}
+	]
+}
