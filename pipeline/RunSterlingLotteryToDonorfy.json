@@ -283,13 +283,13 @@
 			"ErrorAlertDestinationWebhooks": {
 				"type": "Array",
 				"defaultValue": [
-					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=78_UtTs6uUpZ2jgZPTVV0_Tfhx5dBxkY6qLRnTknnM4"
+					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b853a1e219524fdcbaac837a112b0cc6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=k3jK29jL73OKBjvgBYeNsgqsEOJq_4ZBZY8l--x8LCY"
 				]
 			},
 			"AlertDestinationWebhooks": {
 				"type": "Array",
 				"defaultValue": [
-					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0fb20297f38d4d18ac8f0709b889461a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=78_UtTs6uUpZ2jgZPTVV0_Tfhx5dBxkY6qLRnTknnM4"
+					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b853a1e219524fdcbaac837a112b0cc6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=k3jK29jL73OKBjvgBYeNsgqsEOJq_4ZBZY8l--x8LCY"
 				]
 			},
 			"Subscription": {
