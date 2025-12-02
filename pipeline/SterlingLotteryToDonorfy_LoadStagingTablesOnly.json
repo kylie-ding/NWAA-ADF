@@ -768,7 +768,7 @@
 			"ErrorAlertDestinationWebhooks": {
 				"type": "string",
 				"defaultValue": [
-					"https://mastict.webhook.office.com/webhookb2/fe4903b3-4a31-4a06-a361-e45caa7cbf88@93183a8b-45b8-4208-a95c-26fb477572e5/IncomingWebhook/6f63b1d955bd48eab46d10fa6b66bcaa/a112ca9c-4af6-4af5-a5db-5c8b6f213a31"
+					"https://default93183a8b45b84208a95c26fb477572.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b853a1e219524fdcbaac837a112b0cc6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=k3jK29jL73OKBjvgBYeNsgqsEOJq_4ZBZY8l--x8LCY"
 				]
 			},
 			"Subscription": {
